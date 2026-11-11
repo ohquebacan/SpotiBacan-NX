@@ -346,7 +346,35 @@ void TrackLoader::work(const Request& r, Result& out) {
         out.px.resize(64 * 64 * 4);
         for (int y = 0; y < 64; y++) memcpy(&out.px[y * 256], static_cast<uint8_t*>(thumb->pixels) + y * thumb->pitch, 256);
         out.pal = paletteFromPixels(out.px.data(), 64, 64, r.opts);
-        if (SDL_SoftStretchLinear(thumb, nullptr, tiny, nullptr) == 0) { out.blur = tiny; tiny = nullptr; }
+        // SpotiBacan: el fondo era 12x12 estirado a toda la pantalla: con tanto aumento el filtro lineal dejaba cuadros y
+        // diagonales (se veia «pixelado»). Ahora es la miniatura de 64x64 desenfocada de verdad (tres pasadas de caja
+        // de radio 5, que se parecen a una gaussiana): al estirarla no quedan bordes.
+        if (SDL_Surface* soft = SDL_CreateRGBSurfaceWithFormat(0, 64, 64, 32, SDL_PIXELFORMAT_RGBA32)) {
+            std::vector<float> a(64 * 64 * 4), b(64 * 64 * 4);
+            for (int y = 0; y < 64; y++)
+                for (int x = 0; x < 256; x++) a[size_t(y * 256 + x)] = static_cast<uint8_t*>(thumb->pixels)[y * thumb->pitch + x];
+            const int R = 5;
+            for (int pass = 0; pass < 3; pass++) {
+                for (int y = 0; y < 64; y++)   // horizontal (con los bordes repetidos)
+                    for (int x = 0; x < 64; x++)
+                        for (int c = 0; c < 4; c++) {
+                            float sum = 0;
+                            for (int k = -R; k <= R; k++) sum += a[size_t(y * 256 + std::clamp(x + k, 0, 63) * 4 + c)];
+                            b[size_t(y * 256 + x * 4 + c)] = sum / (2 * R + 1);
+                        }
+                for (int y = 0; y < 64; y++)   // vertical
+                    for (int x = 0; x < 64; x++)
+                        for (int c = 0; c < 4; c++) {
+                            float sum = 0;
+                            for (int k = -R; k <= R; k++) sum += b[size_t(std::clamp(y + k, 0, 63) * 256 + x * 4 + c)];
+                            a[size_t(y * 256 + x * 4 + c)] = sum / (2 * R + 1);
+                        }
+            }
+            for (int y = 0; y < 64; y++)
+                for (int x = 0; x < 256; x++)
+                    static_cast<uint8_t*>(soft->pixels)[y * soft->pitch + x] = uint8_t(std::clamp(a[size_t(y * 256 + x)] + 0.5f, 0.f, 255.f));
+            out.blur = soft;
+        } else if (SDL_SoftStretchLinear(thumb, nullptr, tiny, nullptr) == 0) { out.blur = tiny; tiny = nullptr; }
         out.frost = frostOf(thumb);
     }
     if (thumb) SDL_FreeSurface(thumb);

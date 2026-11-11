@@ -8,6 +8,8 @@
 #include "words.hpp"
 #include <algorithm>
 #include <cmath>
+#include <strings.h>
+#include <unordered_map>
 
 #include "app.hpp"
 #include "icons.inc"
@@ -148,19 +150,87 @@ void App::drawDownloads(float x, float y, float w, float h) {
         cy += 16;
     }
 
-    // lo guardado
-    kicker(tr("SAVED", "GUARDADAS"), px, cy + 6, pal.text3);
-    cy += 22;
+    // lo guardado: Canciones, Artistas o Albumes; un artista o un album abierto muestra solo lo suyo
+    static int tab = 0;
+    const std::string& q = route.query;
+    const bool inArtist = q.rfind("artist:", 0) == 0, inAlbum = q.rfind("album:", 0) == 0;
+    auto artistOf = [&](int ti) { const Track& t = lib.tracks[ti]; return t.albumArtist.empty() ? t.artist : t.albumArtist; };
+    std::vector<int> shown;
+    if (inArtist || inAlbum) {
+        const std::string key = q.substr(inArtist ? 7 : 6);
+        for (int ti : saved) {
+            if (inArtist ? artistOf(ti) == key : (artistOf(ti) + '\x1f' + lib.tracks[ti].album) == key) shown.push_back(ti);
+        }
+        bool c = false;
+        button(uid("dl.back"), ICON_BACK, tr("All downloads", "Todas las descargas"), px, cy, false, &c);
+        if (c) navigate(View::Downloads, -1, "", false);
+        const std::string name = inArtist ? key : key.substr(key.find('\x1f') + 1);
+        g.textC(name, { css::Lg, Weight::Bold }, px + 260, cy + css::BtnH / 2, pal.text, 1, Align::Left, int(pw - 270));
+        cy += css::BtnH + 16;
+    } else {
+        // pestanas grandes, como pastillas
+        const char* tabs[3] = { tr("Songs", "Canciones"), tr("Artists", "Artistas"), tr("Albums", "Albumes") };
+        float tx = px;
+        const Font tf{ css::Base, Weight::SemiBold };
+        for (int i = 0; i < 3; i++) {
+            const float tw = float(g.measure(tabs[i], tf)) + 40, th = css::BtnH;
+            const Id id = uid("dl.tab", i);
+            if (ui.item(id, { tx, cy, tw, th }, th / 2)) tab = i;
+            const bool on = tab == i, hot = ui.pressed(id) || (ui.focused(id) && ui.showFocusRing());
+            g.roundRect(tx, cy, tw, th, th / 2, on ? pal.accent : pal.text, on ? 0.9f : hot ? 0.14f : 0.07f);
+            g.textC(tabs[i], tf, tx + tw / 2, cy + th / 2, on ? pal.onAccent : pal.text, 1, Align::Center);
+            tx += tw + 8;
+        }
+        cy += css::BtnH + 16;
+    }
+
+    const float rh = g_bigLayout ? 70.f : 60.f;
     if (saved.empty()) {
         g.text(tr("Nothing yet. In any playlist, tap Download, or the arrow next to a song.",
                   "Todavia nada. En cualquier lista toca Descargar, o la flecha junto a una cancion."), { css::Base }, px, cy + 10, pal.text2, 1,
                Align::Left, int(pw));
         cy += 60;
-    } else {
-        const float rh = g_bigLayout ? 70.f : 60.f;   // con portada, como las listas
-        for (size_t i = 0; i < saved.size(); ++i) {
+    } else if (inArtist || inAlbum || tab == 0) {
+        const std::vector<int>& list = (inArtist || inAlbum) ? shown : saved;
+        for (size_t i = 0; i < list.size(); ++i) {
             if (cy + rh > y - rh && cy < y + h + rh) {
-                if (coverRow(uid("dl.row", int(i)), saved[i], int(i) + 1, px - 14, cy, pw + 28, rh, false)) playLocal(saved, int(i), false);
+                if (coverRow(uid("dl.row", int(i)), list[i], int(i) + 1, px - 14, cy, pw + 28, rh, false)) playLocal(list, int(i), false);
+            }
+            cy += rh;
+        }
+    } else {
+        // artistas o albumes, con cuantas canciones tiene cada uno (ordenados por nombre)
+        struct Group { std::string key, name, sub; int first = -1, count = 0; };
+        std::vector<Group> groups;
+        std::unordered_map<std::string, size_t> at;
+        for (int ti : saved) {
+            const std::string art = artistOf(ti);
+            const std::string key = tab == 1 ? art : art + '\x1f' + lib.tracks[ti].album;
+            auto it = at.find(key);
+            if (it == at.end()) {
+                at[key] = groups.size();
+                groups.push_back({ key, tab == 1 ? art : lib.tracks[ti].album, tab == 1 ? std::string() : art, ti, 1 });
+            } else groups[it->second].count++;
+        }
+        std::sort(groups.begin(), groups.end(), [](const Group& a, const Group& b) { return strcasecmp(a.name.c_str(), b.name.c_str()) < 0; });
+        for (size_t i = 0; i < groups.size(); ++i) {
+            const Group& gr = groups[i];
+            if (cy + rh > y - rh && cy < y + h + rh) {
+                const Id id = uid(tab == 1 ? "dl.artist" : "dl.album", int(i));
+                const bool hit = ui.item(id, { px - 14, cy, pw + 28, rh - 4 }, 10);
+                const bool hot = ui.pressed(id) || (ui.focused(id) && ui.showFocusRing());
+                if (hot) g.roundRect(px - 14, cy, pw + 28, rh - 4, 10, pal.text, ui.pressed(id) ? 0.11f : 0.065f);
+                const float cov = rh - 20, ccy = cy + (rh - 4) / 2;
+                if (tab == 1) {   // artista: circulo con la portada de una de sus canciones
+                    coverBox(gr.first, px + 4, ccy - cov / 2, cov, cov / 2);
+                } else coverBox(gr.first, px + 4, ccy - cov / 2, cov, 7);
+                const float tx = px + 4 + cov + 16;
+                g.text(gr.name, { css::Base, Weight::SemiBold }, tx, ccy - (gr.sub.empty() ? 10 : 20), pal.text, 1, Align::Left, int(pw - cov - 160));
+                if (!gr.sub.empty()) g.text(gr.sub, { css::Sm }, tx, ccy + 2, pal.text3, 1, Align::Left, int(pw - cov - 160));
+                g.textC(std::to_string(gr.count) + (gr.count == 1 ? tr(" song", " cancion") : tr(" songs", " canciones")), { css::Sm }, px + pw - 30, ccy,
+                        pal.text3, 1, Align::Right);
+                g.icon(ICON_CHEV, px + pw - 8, ccy, 16, pal.text3);
+                if (hit) navigate(View::Downloads, -1, (tab == 1 ? "artist:" : "album:") + gr.key);
             }
             cy += rh;
         }
