@@ -100,7 +100,7 @@ void App::drawTrackList(float x, float y, float w, float h) {
     }
 
     ScrollArea& sa = area(v == View::Search ? "search" : "list", int(v) * 1000 + route.ref);
-    const float headH = 18 + 120 + 14;
+    const float headH = 18 + 120 + 14 + (g_bigLayout ? 14 : 0);   // SpotiBacan: lugar para los botones de 44 px
     sa.view = { x, y, w, h };
     ui.pushArea(&sa);
     const float oy = y - sa.y;
@@ -128,7 +128,7 @@ void App::drawTrackList(float x, float y, float w, float h) {
     g.text(title, { css::Xxl, Weight::Bold }, tx, cyTop + 16, pal.text, 1, Align::Left, int(tw));
     g.text(sub, { css::Sm }, tx, cyTop + 58, pal.text3, 1, Align::Left, int(tw));
     float bx = tx;
-    const float by = cyTop + 120 - css::BtnH;
+    const float by = g_bigLayout ? cyTop + 82 : cyTop + 120 - css::BtnH;   // SpotiBacan: debajo del subtitulo, sin taparlo
     bool clicked = false;
     // The page's playlist, as it was when the frame began: Export and Open folder go to another page part way through
     // (route.ref is then the picker's −1 or a folder's index), and the buttons after them read the playlist again

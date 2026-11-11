@@ -767,9 +767,11 @@ void App::drawPlayerbar() {
     // controls 42 px, gap 6 px, seek 30 px (seekY is the seek row's centre)
     // SpotiBacan: en la vista Grande los controles crecen (play 54 px, el resto 46 px con iconos de 24)
     const bool bigC = g_bigLayout;
-    const float pr = bigC ? 27.f : 21.f, cs = bigC ? 46.f : 34.f, ci = bigC ? 24.f : 18.f, cg = bigC ? 14.f : 10.f;
-    const float ctrlY = y0 + (css::BarH - (pr * 2 + 6 + 30)) / 2 + pr, seekY = ctrlY + pr + 6 + 15;
-    const float mid = cx0 + centerW / 2;
+    const float pr = bigC ? 30.f : 21.f, cs = bigC ? 50.f : 34.f, ci = bigC ? 26.f : 18.f, cg = bigC ? 12.f : 10.f;
+    // Grande: una sola fila, [orden][anterior][play][siguiente] y al lado el tiempo; Clasica: controles arriba, tiempo abajo
+    const float ctrlY = bigC ? y0 + css::BarH / 2 : y0 + (css::BarH - (pr * 2 + 6 + 30)) / 2 + pr;
+    const float seekY = bigC ? ctrlY : ctrlY + pr + 6 + 15;
+    const float mid = bigC ? cx0 + cs + cg + cs + cg + pr : cx0 + centerW / 2;
     const char* orderIcon = store.order == Order::Shuffle ? ICON_SHUFFLE : store.order == Order::RepeatOne ? ICON_REPEAT1
                           : store.order == Order::RepeatAll ? ICON_REPEAT : ICON_ORDER;
     const std::string curPath = (now.track >= 0 && now.track < int(lib.tracks.size())) ? lib.tracks[now.track].path : (!now.info.title.empty() ? now.info.title + " - " + now.info.artist : "");
@@ -811,7 +813,8 @@ void App::drawPlayerbar() {
     if (iconButton(uid("pb.next"), ICON_NEXT, mid + pr + cg + cs / 2, ctrlY, false, cs, ci)) next(false);
 
     // .pb-seek: 48 | 1fr | 48, gap 10
-    const float seekW = std::min(760.f, centerW), sx = mid - seekW / 2;
+    const float seekW = bigC ? (cx0 + centerW) - (mid + pr + cg + cs + 18) : std::min(760.f, centerW);
+    const float sx = bigC ? mid + pr + cg + cs + 18 : mid - seekW / 2;
     g.textC(hasTrack ? fmtTime(player.position()) : "0:00", { css::Xs }, sx + 48, seekY, pal.text3, 1, Align::Right);
     auto durText = [&](bool old) { g.textC(hasTrack ? fmtTime(old ? mixOld.info.duration : now.info.duration) : "0:00", { css::Xs }, sx + seekW - 48, seekY, pal.text3); };
     // the song's length swipes with the waveform, as one (the user, 2026-10-29: "just the waveform's effect")

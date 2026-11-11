@@ -2233,6 +2233,12 @@ void App::loadTrack(int trackIdx, bool paused, bool start, double fade, const au
         bgs.awaitUntil = time + 2.5;
         return;
     }
+    // SpotiBacan: un archivo de la SD (Descargas) lo toca el reproductor de la app. NXtify habia dejado solo el camino
+    // del servicio de fondo: sin el, lo descargado no sonaba.
+    const bool ok = player.load(t.path, paused, fade, mix);
+    LOG("App::loadTrack: local %s -> %s", t.path.c_str(), ok ? "ok" : "FAILED");
+    if (ok) player.setLevel(gain, true);
+    else if (++q.failed < int(q.tracks.size())) toast(tr("This file could not be played", "No se pudo reproducir este archivo"));
 }
 
 // ============================================================ the background player

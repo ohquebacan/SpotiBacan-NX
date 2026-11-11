@@ -56,7 +56,10 @@ std::vector<int> App::downloadedTracks() {
             cached.push_back(it->second);
         }
     }
-    if (added) rebuildIndex();
+    if (added) {
+        rebuildIndex();
+        meta.syncLibrary(&lib, store.path("tags.tsv"));   // etiquetas y caratula desde el propio .ogg
+    }
     return cached;
 }
 
@@ -154,10 +157,10 @@ void App::drawDownloads(float x, float y, float w, float h) {
                Align::Left, int(pw));
         cy += 60;
     } else {
-        const float rh = css::BtnH + 18;
+        const float rh = g_bigLayout ? 70.f : 60.f;   // con portada, como las listas
         for (size_t i = 0; i < saved.size(); ++i) {
             if (cy + rh > y - rh && cy < y + h + rh) {
-                if (trackRow(uid("dl.row", int(i)), saved[i], int(i) + 1, px - 14, cy, pw + 28, rh, true)) playLocal(saved, int(i), false);
+                if (coverRow(uid("dl.row", int(i)), saved[i], int(i) + 1, px - 14, cy, pw + 28, rh, false)) playLocal(saved, int(i), false);
             }
             cy += rh;
         }
