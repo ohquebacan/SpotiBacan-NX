@@ -18,6 +18,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <unordered_set>
 #include <vector>
 
 namespace cspot { struct Context; }
@@ -51,7 +52,10 @@ public:
 
     /** Donde queda (o quedaria) una cancion. */
     static std::string pathFor(const DlJob& j);
-    static bool isDownloaded(const DlJob& j);
+    /** En memoria (no toca la SD): la carpeta se lee una vez, en segundo plano; hasta entonces responde false. */
+    bool isDownloaded(const DlJob& j);
+    /** Sube cada vez que cambia lo que hay en la SD (termino de leerla o se guardo una cancion): para recalcular. */
+    uint64_t generation() const { return gen_.load(); }
 
 private:
     Downloader() = default;
@@ -70,4 +74,10 @@ private:
     std::shared_ptr<cspot::Context> ctx_;
     Status st_;
     std::atomic<int64_t> got_{ 0 }, total_{ 0 };
+    std::mutex savedM_;
+    std::unordered_set<std::string> saved_;   // rutas en minusculas (FAT no distingue)
+    std::atomic<bool> scanStarted_{ false };
+    std::atomic<uint64_t> gen_{ 0 };
+    std::thread scan_;
+    void markSaved(const std::string& path);
 };

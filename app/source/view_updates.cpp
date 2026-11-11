@@ -450,7 +450,8 @@ void App::defaultSettings() {
     if (store.updates) updater.cancel();
     store = std::move(fresh);
     g_lang = store.lang;
-    sideW = store.sidebarCollapsed ? css::SideWCollapsed : css::SideW;
+    g_bigLayout = store.bigLayout;
+    sideW = sidebarFolded() ? foldW() : css::SideW;
     sideP_ = store.sidebarCollapsed ? 0.f : 1.f;
     volumeShown = store.volume;
     player.setVolume(volumeShown);

@@ -15,7 +15,7 @@
 #include "icons.inc"
 
 namespace {
-constexpr float RowH = 48;   // SpotiBacan: 48 (antes 40), mas comodo para el dedo
+#define RowH (g_bigLayout ? 48.f : 40.f)   // SpotiBacan: filas mas altas en la vista Grande
 }
 
 void App::drawTrackList(float x, float y, float w, float h) {
@@ -51,25 +51,33 @@ void App::drawTrackList(float x, float y, float w, float h) {
         placeholder = playlistIcon(route.ref);
     }
     sub = fmtTotal(tracks);
-    // SpotiBacan: las canciones de Spotify de esta lista, para «Descargar», y como va la descarga
-    std::vector<DlJob> dlJobs;
-    int dlHave = 0;
+    // SpotiBacan: las canciones de Spotify de esta lista, para «Descargar», y cuantas ya estan en la SD. Se recalcula
+    // solo cuando cambia la lista o lo guardado (antes se miraba la SD por cada cancion en cada cuadro: con una lista de
+    // 1300 canciones, 1300 consultas a la tarjeta 60 veces por segundo, y la app iba a tirones).
+    static struct { View v = View::Home; int ref = -2; size_t n = 0; int first = -1; uint64_t gen = ~0ull; int have = 0; std::vector<DlJob> jobs; } dl;
     if (v != View::Queue && v != View::Search) {
-        for (int ti : tracks) {
-            if (ti < 0 || ti >= int(lib.tracks.size())) continue;
-            const Track& t = lib.tracks[ti];
-            if (t.path.rfind("spotify:track:", 0) != 0) continue;
-            DlJob j{ t.path, t.title, t.albumArtist.empty() ? t.artist : t.albumArtist, t.album, t.trackNo };
-            if (Downloader::isDownloaded(j)) ++dlHave;
-            else dlJobs.push_back(std::move(j));
+        const uint64_t gen = Downloader::instance().generation();
+        const int first = tracks.empty() ? -1 : tracks.front();
+        if (dl.v != v || dl.ref != route.ref || dl.n != tracks.size() || dl.first != first || dl.gen != gen) {
+            dl.v = v; dl.ref = route.ref; dl.n = tracks.size(); dl.first = first; dl.gen = gen;
+            dl.have = 0;
+            dl.jobs.clear();
+            for (int ti : tracks) {
+                if (ti < 0 || ti >= int(lib.tracks.size())) continue;
+                const Track& t = lib.tracks[ti];
+                if (t.path.rfind("spotify:track:", 0) != 0) continue;
+                DlJob j{ t.path, t.title, t.albumArtist.empty() ? t.artist : t.albumArtist, t.album, t.trackNo };
+                if (Downloader::instance().isDownloaded(j)) ++dl.have;
+                else dl.jobs.push_back(std::move(j));
+            }
         }
         const Downloader::Status ds = Downloader::instance().status();
         if (ds.active) {
             char pc[48];
             snprintf(pc, sizeof pc, "  ·  descargando (%d en cola, %d%%)", ds.pending + 1, int(ds.progress * 100));
             sub += pc;
-        } else if (dlHave > 0) {
-            sub += "  ·  " + std::to_string(dlHave) + (dlHave == 1 ? " descargada" : " descargadas");
+        } else if (dl.have > 0) {
+            sub += "  ·  " + std::to_string(dl.have) + (dl.have == 1 ? " descargada" : " descargadas");
         }
         if (ds.keyDenied > 0 && !ds.active) sub += "  ·  Spotify nego la clave de audio (probablemente por la cuenta)";
     }
@@ -169,8 +177,8 @@ void App::drawTrackList(float x, float y, float w, float h) {
         bx += button(uid("pl.shuffle"), ICON_SHUFFLE, tr("Shuffle", "Aleatorio"), bx, by, false, &clicked) + 8;
         if (clicked && !tracks.empty()) playTracks(tracks, 0, playName, true);
     }
-    if (!dlJobs.empty() && action("pl.download", ICON_DOWNLOAD, tr("Download", "Descargar"))) {
-        const int n = Downloader::instance().enqueue(dlJobs);
+    if (v != View::Queue && v != View::Search && !dl.jobs.empty() && action("pl.download", ICON_DOWNLOAD, tr("Download", "Descargar"))) {
+        const int n = Downloader::instance().enqueue(dl.jobs);
         LOG("Descargar esta lista: %d canciones nuevas en cola", n);
     }
     if (v == View::Queue) {

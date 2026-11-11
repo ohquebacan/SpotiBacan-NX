@@ -43,7 +43,7 @@ inline int W = 1280, H = 720;   // follows the window: the shorter way 1280×720
 #else
 constexpr int W = 1280, H = 720;
 #endif
-constexpr float TbH = 46, BarH = 92, SideW = 236, SideWCollapsed = 88;
+constexpr float TbH = 46, BarH = 92, SideW = 236, SideWCollapsed = 68, RailW = 88;
 // --fs-* scale, one pixel up from the desktop values for a handheld screen
 constexpr int Xs = 12, Sm = 13, Base = 15, Md = 16, Lg = 19, Xl = 25, Xxl = 34, Hero = 52;
 }  // namespace css
@@ -587,7 +587,8 @@ private:
     float sideP_ = 1;
     double sideOpenedAt_ = -10;   // when it last began to open: the wordmark's shimmer plays as it lands
     /** How open the sidebar is, 0..1, as drawn (from sideW) */
-    float sideOpen() const { return std::clamp((sideW - css::SideWCollapsed) / (css::SideW - css::SideWCollapsed), 0.f, 1.f); }
+    float foldW() const { return store.bigLayout ? css::RailW : css::SideWCollapsed; }   // SpotiBacan: el riel es mas ancho
+    float sideOpen() const { return std::clamp((sideW - foldW()) / (css::SideW - foldW()), 0.f, 1.f); }
     int marqueeTrack = -2;   // the player bar's long title and artist scroll from marqueeAt, again for each track
     double marqueeAt = 0;
     float volumeShown = 1;
@@ -1032,9 +1033,9 @@ public:
 #ifdef GF_WINDOWED
     static constexpr int kNarrowW = 1170;   // under this the pages need the sidebar's room: it folds by itself, and comes back
     bool sideOpenedNarrow_ = false;
-    bool sidebarFolded() const { return css::W < kNarrowW ? !sideOpenedNarrow_ : store.sidebarCollapsed; }
+    bool sidebarFolded() const { return store.bigLayout || (css::W < kNarrowW ? !sideOpenedNarrow_ : store.sidebarCollapsed); }
 #else
-    bool sidebarFolded() const { return store.sidebarCollapsed; }
+    bool sidebarFolded() const { return store.bigLayout || store.sidebarCollapsed; }
 #endif
     Uint64 lastTick_ = 0;
     int hz_ = 60;   // the screen's refreshes a second

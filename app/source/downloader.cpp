@@ -17,6 +17,8 @@
 #include <pb_decode.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <dirent.h>
+#include <strings.h>
 
 #include <chrono>
 #include <cstdio>
@@ -156,7 +158,50 @@ std::string Downloader::pathFor(const DlJob& j) {
     return std::string(ROOT) + "/" + artist + "/" + album + "/" + num + safeName(j.title, "Cancion") + ".ogg";
 }
 
-bool Downloader::isDownloaded(const DlJob& j) { return exists(pathFor(j)); }
+namespace {
+std::string lower(std::string s) {
+    for (char& c : s) c = char(tolower((unsigned char)c));
+    return s;
+}
+void walk(const std::string& dir, std::unordered_set<std::string>& out, int depth) {
+    if (depth > 4) return;
+    DIR* d = opendir(dir.c_str());
+    if (!d) return;
+    while (dirent* e = readdir(d)) {
+        const std::string n = e->d_name;
+        if (n == "." || n == "..") continue;
+        const std::string full = dir + "/" + n;
+        if (e->d_type == DT_DIR) walk(full, out, depth + 1);
+        else if (n.size() > 4 && strcasecmp(n.c_str() + n.size() - 4, ".ogg") == 0) out.insert(lower(full));
+    }
+    closedir(d);
+}
+}  // namespace
+
+bool Downloader::isDownloaded(const DlJob& j) {
+    if (!scanStarted_.exchange(true)) {
+        scan_ = std::thread([this] {
+            std::unordered_set<std::string> found;
+            walk(ROOT, found, 0);
+            {
+                std::scoped_lock l(savedM_);
+                saved_.insert(found.begin(), found.end());
+            }
+            ++gen_;
+        });
+    }
+    const std::string p = lower(pathFor(j));
+    std::scoped_lock l(savedM_);
+    return saved_.count(p) != 0;
+}
+
+void Downloader::markSaved(const std::string& path) {
+    {
+        std::scoped_lock l(savedM_);
+        saved_.insert(lower(path));
+    }
+    ++gen_;
+}
 
 int Downloader::enqueue(const std::vector<DlJob>& jobs) {
     int added = 0;
@@ -199,6 +244,7 @@ void Downloader::shutdown() {
     }
     cv_.notify_all();
     if (worker_.joinable()) worker_.join();
+    if (scan_.joinable()) scan_.join();
     dropSession();
 }
 
@@ -393,6 +439,7 @@ Downloader::Result Downloader::fetch(const DlJob& j, std::string& err) {
     }
     remove(dst.c_str());
     if (rename(tmp.c_str(), dst.c_str()) != 0) { remove(tmp.c_str()); err = "No se pudo escribir en la tarjeta"; return Result::Failed; }
+    markSaved(dst);
     LOG("Downloader: guardada %s (%zu bytes)", dst.c_str(), s.offset - SPOTIFY_HEADER);
     return Result::Ok;
 }

@@ -5,7 +5,8 @@
  */
 #pragma once
 
-inline int g_lang = 1;   // 0 = English, 1 = Español
+inline int g_lang = 1;
+inline bool g_bigLayout = true;   // SpotiBacan: espejo de Store::bigLayout para lo que no ve el Store   // 0 = English, 1 = Español
 inline const char* tr(const char* en, const char* es) {
     return g_lang == 1 ? es : en;
 }

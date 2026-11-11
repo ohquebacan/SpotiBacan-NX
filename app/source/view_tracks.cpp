@@ -17,7 +17,7 @@
 
 namespace {
 
-constexpr float RowH = 48;        // SpotiBacan: 48 (antes 40), mas comodo para el dedo
+#define RowH (g_bigLayout ? 48.f : 40.f)   // SpotiBacan: filas mas altas en la vista Grande
 constexpr float CovRowH = 60;     // .vrow.wc: --rowc 56, + 4
 constexpr float GroupH = 76;      // .vhead: --head 72, + 4
 constexpr float ColHeadH = 38;    // .list-head 30 + 8 below

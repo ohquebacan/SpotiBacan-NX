@@ -159,7 +159,7 @@ bool App::init() {
     LOG("App::init: starting stats & levels...");
     stats.start(Store::Dir);
     levels.start(Store::Dir);
-    sideW = store.sidebarCollapsed ? css::SideWCollapsed : css::SideW;
+    sideW = sidebarFolded() ? foldW() : css::SideW;
     sideP_ = store.sidebarCollapsed ? 0.f : 1.f;
     applyTheme();
     pal = target;
@@ -656,6 +656,11 @@ void App::frame() {
         if (profFrames_ > 0 && profFrames_ % 300 == 0) {
             LOG("Heartbeat: frame %u, dt=%.4f, view=%d", profFrames_, dt, int(route.view));
         }
+        // SpotiBacan: cada tiron queda anotado (cuadro de mas de 70 ms), con la vista, para saber donde se traba
+        if (!firstFrame_ && interval > 0.070) {
+            static int stalls = 0;
+            if (++stalls <= 400) LOG("Tiron: %.0f ms, view=%d", double(interval) * 1000.0, int(route.view));
+        }
 #if defined(GF_WINDOWED) && defined(GF_DEV)
         g.said.clear();
 #endif
@@ -1078,7 +1083,7 @@ void App::update() {
         if (to == 1 && sideP_ == 0) sideOpenedAt_ = time;
         sideP_ = !store.motion ? to : to > sideP_ ? std::min(to, sideP_ + dt / 0.38f) : std::max(to, sideP_ - dt / 0.38f);
         const float e = sideP_ < 0.5f ? 4 * sideP_ * sideP_ * sideP_ : 1 - std::pow(-2 * sideP_ + 2, 3.f) / 2;   // cubic, in and out
-        sideW = css::SideWCollapsed + (css::SideW - css::SideWCollapsed) * e;
+        sideW = foldW() + (css::SideW - foldW()) * e;
     }
     toastT = std::max(0.f, toastT - dt);
 

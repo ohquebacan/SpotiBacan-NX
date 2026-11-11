@@ -442,7 +442,7 @@ void App::drawTitlebar() {
 void App::drawSidebar() {
     const float x0 = 10, w = sideW - 20;
     const bool collapsed = sideW < 120;
-    if (collapsed && sideOpen() < 0.02f) { drawRail(); return; }
+    if (store.bigLayout && sideOpen() < 0.02f) { drawRail(); return; }
     // how far open (App::sideOpen): the labels come in over its second half, settling 8 px towards the icons
     const float open = sideOpen(), lab = std::clamp((open - 0.4f) / 0.6f, 0.f, 1.f), labA = lab * lab * (3 - 2 * lab);
     float y = css::TbH + 6;
@@ -810,6 +810,30 @@ void App::drawPlayerbar() {
     drawSeek(sx + 58, seekY - 15, seekW - 116, 30, uid("pb.seek"));
     wipeGroup_.on = false;
 
+    if (!store.bigLayout) {
+        // .pb-right: queue, volume, canvas
+        float x = rx + leftW;
+        if (iconButton(uid("pb.canvas"), ICON_CANVAS, x - 17, cy)) openCanvas(true);
+        x -= 34 + 14;   // Gatefold has the mini-player button here; keep the slider clear of the Canvas button
+        float vol = volumeShown;
+        slider(uid("pb.vol"), x - 110, cy, 110, volumeShown, &vol);
+        if (vol != volumeShown) { volumeShown = vol; player.setVolume(vol); }
+        x -= 110 + 4 + 7;
+        static float beforeMute = 1;
+        if (iconButton(uid("pb.mute"), volumeShown <= 0.001f ? ICON_VOL_X : ICON_VOL, x - 17, cy)) {
+            if (volumeShown > 0.001f) { beforeMute = volumeShown; volumeShown = 0; }
+            else volumeShown = beforeMute > 0.01f ? beforeMute : 1;
+            player.setVolume(volumeShown);
+        }
+        x -= 34 + 8;
+        if (iconButton(uid("pb.queue"), ICON_QUEUE, x - 17, cy, route.view == View::Queue)) navigate(View::Queue);
+        // The sleep timer: lit while it runs (or stop-after is on, its "End of this track"), the time left beside it.
+        x -= 34 + 8;
+        const double sl = sleepLeft();
+        if (iconButton(uid("pb.sleep"), ICON_MOON, x - 17, cy, sl > 0 || stopAfterCurrent)) openSleep();
+        if (sl > 0) g.textC(fmtTime(std::ceil(sl)), { css::Xs, Weight::SemiBold }, x - 34 - 4, cy, pal.accentInk, 1, Align::Right);
+        return;
+    }
     // SpotiBacan: .pb-right en pastillas de informacion (lo que sigue, la descarga, el temporizador, el espacio en la SD)
     // en lugar de iconos chicos. Cada una se toca: la que sigue abre la cola; la descarga y la SD, Descargas; la luna,
     // el temporizador. Se ponen de derecha a izquierda y la que no cabe no se muestra.

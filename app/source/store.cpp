@@ -154,7 +154,8 @@ void Store::load() {
         const std::string k = l.substr(0, eq), v = l.substr(eq + 1);
         if (k == "volume") volume = std::clamp(float(atof(v.c_str())), 0.f, 1.f);
         else if (k == "order") order = Order(std::clamp(atoi(v.c_str()), 0, 3));
-        else if (k == "sidebarRail") sidebarCollapsed = v == "1";
+        else if (k == "sidebarCollapsed") sidebarCollapsed = v == "1";
+        else if (k == "bigLayout") bigLayout = v == "1";
         else if (k == "motion") motion = v == "1";
         else if (k == "mixAnimNow") mixAnimNow = std::clamp(atoi(v.c_str()), 0, 2);
         else if (k == "mixAnimCanvas") mixAnimCanvas = std::clamp(atoi(v.c_str()), 0, 1);
@@ -260,6 +261,7 @@ void Store::load() {
         else if (k == "lang") lang = std::clamp(atoi(v.c_str()), 0, 1);
     }
     g_lang = lang;
+    g_bigLayout = bigLayout;
     gfEqClamp(&eq);
     playlists.clear();
     for (const auto& l : readLines(path("playlists.txt"))) {
@@ -399,7 +401,7 @@ void Store::saveCovers() const {
 void Store::save() const {
     makeDirs();
     std::string f;
-    appendf(f, "volume=%.3f\norder=%d\nsidebarRail=%d\nmotion=%d\nspectrum=%d\ncanvasLayout=%d\ncanvasLyrics=%d\n", volume, int(order),
+    appendf(f, "volume=%.3f\norder=%d\nsidebarCollapsed=%d\nmotion=%d\nspectrum=%d\ncanvasLayout=%d\ncanvasLyrics=%d\n", volume, int(order),
             sidebarCollapsed, motion, showSpectrum, canvasLayout, canvasLyrics);
     appendf(f, "vizSensitivity=%.3f\nvizSmoothing=%.3f\nvizBands=%d\nvizPeaks=%d\ncoverPulse=%.3f\n", vizSensitivity, vizSmoothing, vizBands,
             vizPeaks, coverPulse);
@@ -443,7 +445,7 @@ void Store::save() const {
     appendf(f, "\ntabLines=1");   // knows placed lines (Store::load)
     appendf(f, "\n");
     appendf(f, "showHidden=%d\nfilesTab=1\nviewPlaylists=%d\n", showHidden, viewPlaylists);
-    appendf(f, "autoSave=%d\n", autoSave ? 1 : 0);   // filesTab: hiddenTabs already knows the Files tab (bit 6)
+    appendf(f, "autoSave=%d\nbigLayout=%d\n", autoSave ? 1 : 0, bigLayout ? 1 : 0);   // filesTab: hiddenTabs already knows the Files tab (bit 6)
     for (const auto& [k, v] : { std::pair<const char*, const std::string*>{ "filesDir", &filesDir }, { "importDir", &importDir },
                                 { "exportDir", &exportDir }, { "coverDir", &coverDir }, { "backupDir", &backupDir } })
         if (!v->empty()) appendf(f, "%s=%s\n", k, v->c_str());
