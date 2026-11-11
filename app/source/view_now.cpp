@@ -15,6 +15,8 @@ float clampf(float v, float lo, float hi) { return std::min(hi, std::max(lo, v))
 }  // namespace
 
 void App::drawNow(float x, float y, float w, float h) {
+    g_compactButtons = true;   // SpotiBacan: aqui los botones de siempre
+    struct Restore { ~Restore() { g_compactButtons = false; } } restoreButtons;
     // .np grid: padding clamp(16px, 3vh, 40px) clamp(20px, 4vw, 64px); gap clamp(24px, 4vw, 64px)
     const float padH = clampf(css::W * 0.04f, 20, 64), gap = clampf(css::W * 0.04f, 24, 64);
 #ifdef GF_WINDOWED

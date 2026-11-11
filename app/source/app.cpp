@@ -5,6 +5,7 @@
 #include "downloader.hpp"
 #include "qrcodegen.h"
 #include "spotibacan_migrate.hpp"
+#include "BellLogger.h"
 #include "app.hpp"
 #include "cores.hpp"
 #include "icons.inc"
@@ -2651,6 +2652,12 @@ void App::saveSpotifySession(int targetPos) {
 /** Takes the background player's queue as NXtify's own. */
 bool App::bgAdoptQueue() {
     if (!player.remote()) return false;
+    // SpotiBacan: mientras el servicio arranca no hay cancion, solo su aviso («Abre la aplicacion... e inicia sesion»):
+    // eso no es una cancion y quedaba en la cola y en la biblioteca como una fila falsa
+    {
+        const std::string& bt = bg.title();
+        if (bt.empty() || bt == "SpotiBacán" || bt == "SpotiBacan" || bt == "NXtify" || bt == "Switify") return false;
+    }
     const std::string title = bg.title().empty() ? "SpotiBacán" : bg.title();
     const std::string artist = bg.artist().empty() ? "SpotiBacán" : bg.artist();
     const std::string album = bg.album().empty() ? "SpotiBacán" : bg.album();
@@ -3446,6 +3453,9 @@ bool App::loadSpotifyLibrary() {
             if (nextTab == line.size()) break;
         }
         if (cols.size() >= 4) {
+            // SpotiBacan: fuera las filas falsas que dejo el aviso del servicio en versiones anteriores
+            if (cols[0].rfind("spotify:track:remote:", 0) == 0 &&
+                (cols[1] == "SpotiBacán" || cols[1] == "SpotiBacan" || cols[1] == "NXtify" || cols[1] == "Switify")) continue;
             Track t;
             t.path = cols[0];
             t.title = cols[1];
@@ -4155,6 +4165,9 @@ int main(int argc, char** argv) {
     }
 #endif
     logInit();
+    // SpotiBacan: el registro de cspot/bell tiene que existir antes de cualquier sesion (el descargador abre una): sin
+    // esto, el primer CSPOT_LOG desreferenciaba un puntero nulo y la app se cerraba al descargar (crash 2168-0002).
+    if (!bell::bellGlobalLogger) bell::setDefaultLogger();
     LOG("=== SpotiBacán UI Main Started ===");
 #ifdef __SWITCH__
     LOG("Applet Type: %d (0=Application, 1=System, 2=Library, 3=Overlay)", int(appletGetAppletType()));

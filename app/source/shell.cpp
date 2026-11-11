@@ -765,7 +765,10 @@ void App::drawPlayerbar() {
 
     // .pb-center: controls (42 px) + 6 px + seek (30 px), centred in the bar
     // controls 42 px, gap 6 px, seek 30 px (seekY is the seek row's centre)
-    const float ctrlY = y0 + (css::BarH - 78) / 2 + 21, seekY = ctrlY + 21 + 6 + 15;
+    // SpotiBacan: en la vista Grande los controles crecen (play 54 px, el resto 46 px con iconos de 24)
+    const bool bigC = g_bigLayout;
+    const float pr = bigC ? 27.f : 21.f, cs = bigC ? 46.f : 34.f, ci = bigC ? 24.f : 18.f, cg = bigC ? 14.f : 10.f;
+    const float ctrlY = y0 + (css::BarH - (pr * 2 + 6 + 30)) / 2 + pr, seekY = ctrlY + pr + 6 + 15;
     const float mid = cx0 + centerW / 2;
     const char* orderIcon = store.order == Order::Shuffle ? ICON_SHUFFLE : store.order == Order::RepeatOne ? ICON_REPEAT1
                           : store.order == Order::RepeatAll ? ICON_REPEAT : ICON_ORDER;
@@ -783,7 +786,7 @@ void App::drawPlayerbar() {
         hint(uid("pb.queue"), tr("Queue", "Cola de reproduccion"));
         hint(uid("pb.sleep"), tr("Sleep timer", "Temporizador de apagado"));
     }
-    if (iconButton(uid("pb.order"), orderIcon, mid - 21 - 10 - 34 - 10 - 17, ctrlY, store.order != Order::Default)) {
+    if (iconButton(uid("pb.order"), orderIcon, mid - pr - cg - cs - cg - cs / 2, ctrlY, store.order != Order::Default, cs, ci)) {
         Order next = Order((int(store.order) + 1) % 4);
         if (next == Order::Shuffle && automixQueue()) next = Order::Default;   // an Automix playlist: no Shuffle (holdOrderForAutomix)
         setOrder(next);
@@ -791,21 +794,21 @@ void App::drawPlayerbar() {
         toast(names[int(store.order)]);
         store.save();
     }
-    if (iconButton(uid("pb.prev"), ICON_PREV, mid - 21 - 10 - 17, ctrlY)) prev();
+    if (iconButton(uid("pb.prev"), ICON_PREV, mid - pr - cg - cs / 2, ctrlY, false, cs, ci)) prev();
     {
         // .play-btn: 42 px circle in --text, icon in --bg
         const Id pid = uid("pb.play");
-        if (ui.item(pid, { mid - 21, ctrlY - 21, 42, 42 }, 21)) togglePlay();
+        if (ui.item(pid, { mid - pr, ctrlY - pr, pr * 2, pr * 2 }, pr)) togglePlay();
         const float s = ui.pressed(pid) ? 0.95f : (ui.focused(pid) && ui.showFocusRing()) ? 1.06f : 1.f;
         // box-shadow: 0 6px 22px -8px glow 90%, drawn as a soft halo all around the button. Three faint layers
         // instead of one strong one, so it eases into the background rather than ringing the edge; it is gone
         // 9 px out, before the seek wave (27 px below the centre).
-        for (float r : { 24.f, 27.f, 30.f }) g.glow(mid, ctrlY, r, pal.glow, 0.3f);
-        g.circle(mid, ctrlY, 21 * s, pal.text);
-        if (isPlaying()) g.icon(ICON_PAUSE, mid, ctrlY, 20 * s, pal.bg);
-        else g.icon(ICON_PLAY, mid, ctrlY, 20 * s, pal.bg);
+        for (float r : { pr + 3, pr + 6, pr + 9 }) g.glow(mid, ctrlY, r, pal.glow, 0.3f);
+        g.circle(mid, ctrlY, pr * s, pal.text);
+        if (isPlaying()) g.icon(ICON_PAUSE, mid, ctrlY, (bigC ? 26.f : 20.f) * s, pal.bg);
+        else g.icon(ICON_PLAY, mid, ctrlY, (bigC ? 26.f : 20.f) * s, pal.bg);
     }
-    if (iconButton(uid("pb.next"), ICON_NEXT, mid + 21 + 10 + 17, ctrlY)) next(false);
+    if (iconButton(uid("pb.next"), ICON_NEXT, mid + pr + cg + cs / 2, ctrlY, false, cs, ci)) next(false);
 
     // .pb-seek: 48 | 1fr | 48, gap 10
     const float seekW = std::min(760.f, centerW), sx = mid - seekW / 2;
