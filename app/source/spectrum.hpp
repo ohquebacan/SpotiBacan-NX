@@ -27,6 +27,8 @@ public:
     Spectrum();
     /** pcm: N mono samples of a burst that just arrived. */
     void feed(const float* pcm, int sampleRate);
+    /** SpotiBacan: alturas ya hechas (0..1 por banda), sin FFT ni decibeles: para lo que suena en el servicio de fondo. */
+    void feedBars(const float* v, int n);
     /** Once per display frame. playing = false lets the bars fall. */
     void step(float dt, bool playing);
 

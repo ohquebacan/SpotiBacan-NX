@@ -384,6 +384,38 @@ bool BgClient::pcm(float* out, int n) {
     }
     return true;
 }
+bool BgClient::fakeBars(float* out, int n) {
+    if (!connected_ || st_.status != BgState::Playing || !out || n <= 0) return false;
+    const double now = bgClock();
+    const double pos = position(now);
+    uint32_t seed = 2166136261u;
+    for (unsigned char c : title_) { seed ^= c; seed *= 16777619u; }
+    for (unsigned char c : artist_) { seed ^= c; seed *= 16777619u; }
+    const double bpm = 96.0 + double(seed % 40);
+    const double beat = pos * (bpm / 60.0), twoPi = 6.283185307179586;
+    const double kick = std::pow(0.5 + 0.5 * std::cos(beat * twoPi), 4.0);
+    const double snare = std::pow(0.5 + 0.5 * std::cos((beat - 0.5) * twoPi), 5.0);
+    const double hat = std::pow(0.5 + 0.5 * std::cos(beat * 2.0 * twoPi), 3.0);
+    static constexpr int kMax = 128;
+    static float s_noise[kMax] = {}, s_slow[kMax] = {};
+    static uint32_t s_rng = 0x2545F491u;
+    auto rnd = [] { s_rng = s_rng * 1664525u + 1013904223u; return float(s_rng >> 8) / float(1u << 24); };
+    n = std::min(n, kMax);
+    for (int i = 0; i < n; ++i) {
+        const double f = n > 1 ? double(i) / (n - 1) : 0;
+        s_noise[i] = s_noise[i] * 0.45f + rnd() * 0.55f;          // rapido: cada columna tiembla a su manera
+        s_slow[i] = s_slow[i] * 0.97f + rnd() * 0.03f;            // lento: partes de la cancion con mas o menos de esa banda
+        const double section = 0.75 + 0.25 * std::sin(pos * 0.35 + i * 0.37 + (seed & 15));
+        double v;
+        if (f < 0.2) v = 0.18 + 0.78 * kick * (1.0 - f * 1.5) + 0.12 * s_noise[i];                         // bombo
+        else if (f < 0.65) v = 0.10 + 0.50 * snare + 0.22 * kick + 0.30 * s_noise[i] + 0.25 * s_slow[i];  // caja y voz
+        else v = 0.05 + 0.45 * hat * (0.4 + 0.6 * s_noise[i]) + 0.22 * s_noise[i];                          // platillos
+        v *= section * (1.0 - 0.30 * f);
+        out[i] = float(std::clamp(v, 0.02, 1.0));
+    }
+    return true;
+}
+
 bool BgClient::config(BgConfig& out) {
     out = BgConfig{};
     return true;

@@ -117,6 +117,8 @@ public:
     void setSleep(float seconds);
     /** Newest n mono samples at 48 kHz; false when nothing new since the last call. */
     bool pcm(float* out, int n);
+    /** SpotiBacan: alturas de barras inventadas (0..1), con todo el rango; lo que suena en el servicio no llega como audio. */
+    bool fakeBars(float* out, int n);
     bool config(BgConfig& out);
     void setConfig(const BgConfig& c);
 

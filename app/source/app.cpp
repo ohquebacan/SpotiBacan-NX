@@ -1103,7 +1103,14 @@ void App::update() {
     // servicio de fondo, la senal se inventaba sumando 28 senos x 4096 muestras + una FFT de 4096 en el hilo de la
     // interfaz: era de lo que mas trababa la navegacion.
     const bool specSeen = canvas;   // SpotiBacan: sin ecualizador en Sonando (lo pidio Emilio, y pesa)
-    if (specSeen && isPlaying() && player.latestPcm(pcm_.data(), Spectrum::N)) spec.feed(pcm_.data(), player.sampleRate());
+    if (specSeen && isPlaying()) {
+        // SpotiBacan: lo del servicio de fondo no llega como audio: alturas inventadas con todo el rango (antes se inventaba
+        // una senal y pasaba por la FFT en decibeles, que la aplanaba: todas las columnas quedaban en 3-4 puntos)
+        if (player.remote()) {
+            static float fb[Spectrum::MaxBands];
+            if (bg.fakeBars(fb, std::clamp(spec.params.bands, 8, int(Spectrum::MaxBands)))) spec.feedBars(fb, std::clamp(spec.params.bands, 8, int(Spectrum::MaxBands)));
+        } else if (player.latestPcm(pcm_.data(), Spectrum::N)) spec.feed(pcm_.data(), player.sampleRate());
+    }
     if (specSeen) spec.step(dt, isPlaying());
     // The cover's bass pulse (Now playing, and the Canvas when asked for), eased so a kick swells rather than pops.
     // (still while Automix joins: the user, 2026-10-28)

@@ -65,6 +65,26 @@ void Spectrum::feed(const float* pcm, int sr) {
     sinceFeed_ = 0;
 }
 
+void Spectrum::feedBars(const float* v, int n) {
+    const int nb = std::clamp(params.bands, 8, MaxBands);
+    if (nb != bands) {
+        bands = nb;
+        std::fill(std::begin(bars), std::end(bars), 0.f);
+        std::fill(std::begin(peaks), std::end(peaks), 0.f);
+        std::fill(std::begin(to_), std::end(to_), 0.f);
+        std::fill(std::begin(from_), std::end(from_), 0.f);
+    }
+    const float t = std::min(1.f, sinceFeed_ / interval_);
+    for (int b = 0; b < bands; b++) {
+        from_[b] = from_[b] + (to_[b] - from_[b]) * t;
+        const float fi = n > 1 ? float(b) / (bands - 1) * (n - 1) : 0;
+        const int i0 = std::clamp(int(fi), 0, n - 1), i1 = std::min(n - 1, i0 + 1);
+        to_[b] = std::clamp(v[i0] + (v[i1] - v[i0]) * (fi - i0), 0.f, 1.f);
+    }
+    if (sinceFeed_ < 0.25f) interval_ = std::clamp(interval_ * 0.8f + sinceFeed_ * 0.2f, 0.012f, 0.1f);
+    sinceFeed_ = 0;
+}
+
 void Spectrum::step(float dt, bool playing) {
     sinceFeed_ += dt;
     // viz.js: no new audio for 250 ms (paused, a gap) and the bars fall
