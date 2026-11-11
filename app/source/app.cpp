@@ -2,6 +2,7 @@
  * Gatefold NX · app.cpp
  * Lifecycle, input mapping, play queue and track loading.
  */
+#include "downloader.hpp"
 #include "app.hpp"
 #include "cores.hpp"
 #include "icons.inc"
@@ -98,12 +99,12 @@ bool App::init() {
             }
         }
         const Uint32 flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_BORDERLESS | SDL_WINDOW_ALLOW_HIGHDPI | (store.winMax ? SDL_WINDOW_MAXIMIZED : 0);
-        window_ = kept ? SDL_CreateWindow("NXtify", store.winX, store.winY, store.winW, store.winH, flags)
-                       : SDL_CreateWindow("NXtify", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, int(1280 * k), int(720 * k), flags);
+        window_ = kept ? SDL_CreateWindow("SpotiBacán", store.winX, store.winY, store.winW, store.winH, flags)
+                       : SDL_CreateWindow("SpotiBacán", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, int(1280 * k), int(720 * k), flags);
         if (window_) SDL_SetWindowMinimumSize(window_, 640, 360);
     }
 #else
-    window_ = SDL_CreateWindow("NXtify", 0, 0, css::W, css::H, 0);
+    window_ = SDL_CreateWindow("SpotiBacán", 0, 0, css::W, css::H, 0);
 #endif
     if (!window_) {
         LOG("FATAL: SDL_CreateWindow failed: %s", SDL_GetError());
@@ -275,6 +276,7 @@ void App::shutdown() {
 #endif
     closeJoinEditor();   // its worker ends first
     updater.stop();   // a download stops; the files are only swapped when it finished
+    Downloader::instance().shutdown();   // SpotiBacan: la cancion a medias se borra
     setDimmed(false);
     persistNow();
     Store::flush();
@@ -2492,7 +2494,7 @@ void App::loadSpotifySessionLibrary(bool force) {
         now.info.artist = t.artist;
         now.info.album = t.album;
         now.info.duration = t.duration;
-        now.info.codec = "NXtify";
+        now.info.codec = "SpotiBacán";
         now.info.bitrateKbps = 320;
         now.info.sampleRate = 44100;
     }
@@ -2614,9 +2616,9 @@ void App::saveSpotifySession(int targetPos) {
 /** Takes the background player's queue as NXtify's own. */
 bool App::bgAdoptQueue() {
     if (!player.remote()) return false;
-    const std::string title = bg.title().empty() ? "NXtify" : bg.title();
-    const std::string artist = bg.artist().empty() ? "NXtify" : bg.artist();
-    const std::string album = bg.album().empty() ? "NXtify" : bg.album();
+    const std::string title = bg.title().empty() ? "SpotiBacán" : bg.title();
+    const std::string artist = bg.artist().empty() ? "SpotiBacán" : bg.artist();
+    const std::string album = bg.album().empty() ? "SpotiBacán" : bg.album();
     const double dur = bg.state().duration;
 
     LOG("App::bgAdoptQueue: title='%s', artist='%s', dur=%.1f", title.c_str(), artist.c_str(), dur);
@@ -2719,7 +2721,7 @@ bool App::bgAdoptQueue() {
     now.info.artist = artist;
     now.info.album = album;
     now.info.duration = dur;
-    now.info.codec = "NXtify";
+    now.info.codec = "SpotiBacán";
     now.info.bitrateKbps = 320;
     now.info.sampleRate = 44100;
 
@@ -3146,7 +3148,7 @@ void App::confirmLogoutSpotify() {
     confirm(ICON_SPOTIFY,
             tr("Linked Account", "Cuenta vinculada"),
             tr("Log out", "Cerrar sesion"),
-            "NXtify",
+            "SpotiBacán",
             tr("Log out of your current session?", "Deseas cerrar la sesion actual?"),
             tr("Your account will be unlinked from this Nintendo Switch and instructions to connect another account will be shown.",
                "Se desvinculara tu cuenta de esta Nintendo Switch y se mostraran las instrucciones para conectar otra cuenta."),

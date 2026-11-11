@@ -35,13 +35,13 @@ std::string thousands(size_t n) {
 /** Reports are off until allowed here: what a report sends, where it goes and who can see it, said before anything is sent
  *  (the user, 2026-10-30: "a toggle like Updates for Support, with the privacy prompt too"). */
 void App::allowReports() {
-    confirm(ICON_HELP, tr("Support", "Soporte"), tr("Send reports from NXtify?", "Enviar reportes desde NXtify?"), "GitHub · noesio582-boop/NXtify",
-            tr("Allow NXtify to send reports?", "Permitir que NXtify envie reportes?"),
-            tr("NXtify sends a report only when you fill in the form and press Send, to the NXtify repository on GitHub (noesio582-boop/NXtify). "
-               "With what you write it sends NXtify's version, your console's version, the playing track's format, how many tracks you have, and, if you leave them on, NXtify's last messages. "
+    confirm(ICON_HELP, tr("Support", "Soporte"), tr("Send reports from SpotiBacán?", "Enviar reportes desde SpotiBacán?"), "GitHub · ohquebacan/SpotiBacan-NX",
+            tr("Allow SpotiBacán to send reports?", "Permitir que SpotiBacán envie reportes?"),
+            tr("SpotiBacán sends a report only when you fill in the form and press Send, to the SpotiBacán repository on GitHub (ohquebacan/SpotiBacan-NX). "
+               "With what you write it sends SpotiBacán's version, your console's version, the playing track's format, how many tracks you have, and, if you leave them on, SpotiBacán's last messages. "
                "Never your files' names. You can turn this off at any time.",
-               "NXtify envia un reporte solo cuando completas el formulario y presionas Enviar, al repositorio de NXtify en GitHub (noesio582-boop/NXtify). "
-               "Con lo que escribas se envia la version de NXtify, la version del sistema, el formato de reproduccion, la cantidad de canciones y los ultimos mensajes del registro. "
+               "SpotiBacán envia un reporte solo cuando completas el formulario y presionas Enviar, al repositorio de SpotiBacán en GitHub (ohquebacan/SpotiBacan-NX). "
+               "Con lo que escribas se envia la version de SpotiBacán, la version del sistema, el formato de reproduccion, la cantidad de canciones y los ultimos mensajes del registro. "
                "Puedes desactivar esto en cualquier momento."),
             tr("Allow", "Permitir"), [this] {
                 store.reports = true;
@@ -104,7 +104,7 @@ std::string App::reportBody() const {
     b += "\n\n### " + std::string(bug ? "What happened" : "The idea") + "\n\n" + (sheet.repWhat.empty() ? "(not given)" : sheet.repWhat) + "\n";
     if (bug) b += "\n### Steps\n\n" + (sheet.repSteps.empty() ? std::string("(not given)") : sheet.repSteps) + "\n";
     // the app's part: nothing of the user's files but the playing one's format
-    b += "\n### " GF_CAP_THIS_CONSOLE "\n\n| | |\n|---|---|\n| NXtify | " + Updater::thisVersion() + " · protocol " + std::to_string(Updater::thisProtocol()) + " |\n";
+    b += "\n### " GF_CAP_THIS_CONSOLE "\n\n| | |\n|---|---|\n| SpotiBacán | " + Updater::thisVersion() + " · protocol " + std::to_string(Updater::thisProtocol()) + " |\n";
     b += "{{SYSTEM}}";
 #ifndef GF_WINDOWED
     b += "| Background player | " + std::string(player.remote() ? "connected" : "not connected") + " |\n";
@@ -120,11 +120,11 @@ std::string App::reportBody() const {
     b += "{{CRASHES}}";
     if (sheet.repLog && !logLines_.empty()) {
         const size_t n = std::min<size_t>(40, logLines_.size());
-        b += "\n### NXtify's log (" + (n == 1 ? std::string("its last message") : "the last " + std::to_string(n) + " messages") + ")\n\n```\n";
+        b += "\n### SpotiBacán's log (" + (n == 1 ? std::string("its last message") : "the last " + std::to_string(n) + " messages") + ")\n\n```\n";
         for (size_t i = logLines_.size() > 40 ? logLines_.size() - 40 : 0; i < logLines_.size(); i++) b += logLines_[i] + "\n";
         b += "```\n";
     }
-    b += "\n*Sent from NXtify's Settings › Support.*\n";
+    b += "\n*Sent from SpotiBacán's Settings › Support.*\n";
     return b;
 }
 
@@ -133,7 +133,7 @@ void App::reportHeader(const char*& icon, std::string& kick, std::string& title,
     icon = bug ? ICON_BUG : PLI_BULB;
     kick = tr("Support", "Soporte");
     title = bug ? tr("Report a bug", "Reportar un error") : tr("Suggest a feature", "Sugerir una funcion");
-    sub = report::available() ? tr("Sent to NXtify on GitHub (noesio582-boop/NXtify), with what is listed below", "Enviado a NXtify en GitHub (noesio582-boop/NXtify), con lo indicado abajo") : tr("Open an issue at github.com/noesio582-boop/NXtify/issues", "Abre un issue en github.com/noesio582-boop/NXtify/issues");
+    sub = report::available() ? tr("Sent to SpotiBacán on GitHub (ohquebacan/SpotiBacan-NX), with what is listed below", "Enviado a SpotiBacán en GitHub (ohquebacan/SpotiBacan-NX), con lo indicado abajo") : tr("Open an issue at github.com/ohquebacan/SpotiBacan-NX/issues", "Abre un issue en github.com/ohquebacan/SpotiBacan-NX/issues");
 }
 
 void App::reportRows(std::vector<SheetRow>& rows) {
@@ -171,7 +171,7 @@ void App::reportRows(std::vector<SheetRow>& rows) {
         often.h = 56;
         rows.push_back(often);
     }
-    rows.push_back({ Row::Group, nullptr, tr("Which part of NXtify", "Que parte de NXtify") });
+    rows.push_back({ Row::Group, nullptr, tr("Which part of SpotiBacán", "Que parte de SpotiBacán") });
     rows.back().h = 38;
     const char* const areaLabels[] = {
         tr("Now playing", "Esta sonando"),
@@ -206,13 +206,13 @@ void App::reportRows(std::vector<SheetRow>& rows) {
     crashes.h = 62;
     rows.push_back(crashes);
 #endif
-    Row log{ Row::Toggle, nullptr, tr("NXtify's log", "Registro de NXtify"), tr("Its last 40 messages, the ones shown at the bottom of the screen", "Sus ultimos 40 mensajes mostrados en la parte inferior"), "",
+    Row log{ Row::Toggle, nullptr, tr("SpotiBacán's log", "Registro de SpotiBacán"), tr("Its last 40 messages, the ones shown at the bottom of the screen", "Sus ultimos 40 mensajes mostrados en la parte inferior"), "",
              [this] { sheet.repLog = !sheet.repLog; } };
     log.on = sheet.repLog;
     log.h = 62;
     rows.push_back(log);
-    Row text{ Row::Text, ICON_INFO, "", tr("Always: NXtify's version, your console's version, the playing file's format and how many tracks you have. Never your files' names.",
-                                           "Siempre: la version de NXtify, la version de la consola, el formato de reproduccion y cuantas canciones tienes.") };
+    Row text{ Row::Text, ICON_INFO, "", tr("Always: SpotiBacán's version, your console's version, the playing file's format and how many tracks you have. Never your files' names.",
+                                           "Siempre: la version de SpotiBacán, la version de la consola, el formato de reproduccion y cuantas canciones tienes.") };
     text.h = 2 * 19.f + 14;
     rows.push_back(text);
 }
@@ -230,7 +230,7 @@ void App::reportFooter(float x, float w, float fy) {
         if (!report::available()) toast(tr("This build cannot send reports", "Esta compilacion no puede enviar reportes"));
         else if (!store.reports) { closeSheet(); allowReports(); }   // (switched off meanwhile: asked again)
         else if (sheet.repTitle.empty()) toast(tr("Add a title first", "Agrega un titulo primero"));
-        else if (sheet.repArea < 0) toast(tr("Choose the part of NXtify it is about", "Elige de que parte de NXtify trata"));
+        else if (sheet.repArea < 0) toast(tr("Choose the part of SpotiBacán it is about", "Elige de que parte de SpotiBacán trata"));
         else if (wait > 0) toast(std::string(tr("One report every five minutes: try again in ", "Un reporte cada cinco minutos: intenta en ")) + std::to_string(int(wait / 60) + 1) + " min");
         else {
             const bool bug = sheet.repKind == 0;

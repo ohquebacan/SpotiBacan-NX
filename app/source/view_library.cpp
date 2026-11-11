@@ -236,7 +236,7 @@ void App::drawLibrary(float x, float y, float w, float h) {
     std::string sub = std::to_string(lib.tracks.size()) + tr(" tracks in Liked Songs", " canciones en Tus me gusta");
     if (!tracksFilter.empty()) sub += std::string(tr(" · filter: “", " · filtro: “")) + tracksFilter + "”";
     float cy = y + 18 + 8;
-    kicker("NXtify", x + 28, cy, pal.accent);
+    kicker("SpotiBacán", x + 28, cy, pal.accent);
     cy += 10;
     g.text(tr("Tracks", "Canciones"), { css::Xxl, Weight::Bold }, x + 28, cy, pal.text, 1, Align::Left, int(w - 56));
     cy += 38;

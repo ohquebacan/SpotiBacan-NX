@@ -130,7 +130,7 @@ std::string App::storageValue(int which) {
 void App::clearStorage(int which) {
     static const char* titles[6] = { "Covers cache", "Covers for the overlay", "Loudness measurements", "Tag cache", "Backups", "Downloads" };
     static const char* texts[6] = {
-        "The small copies of every cover that lists show. NXtify makes them again in the background, a few minutes for a large library.",
+        "The small copies of every cover that lists show. SpotiBacán makes them again in the background, a few minutes for a large library.",
         "The covers the overlay shows. Made again for each queue sent to the background player, or all of them from Settings › Playback.",
         "Every track's measured loudness and Automix's analysis. With volume levelling or Automix on, the library is measured again in the background; until then tracks play unlevelled and join with a plain fade.",
         "The tags read from your files. Every file is read again now, as Library's \"Read all tags again\" does; your own tag edits stay.",

@@ -33,6 +33,9 @@ public:
 
     const std::string& username() const { return username_; }
 
+    // SpotiBacan: a Web API token for the downloader (storage-resolve); empty when it cannot get one.
+    std::string webAccessToken();
+
 private:
     SpotifyApi();
     ~SpotifyApi();

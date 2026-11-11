@@ -77,7 +77,7 @@ const std::vector<TourStep>& App::tourStepsAt(int level) {
     static const std::vector<TourStep> all = {
         // ---- Welcome (the first card asks which tour: drawTour)
         { 0, 0, ICON_SPARKLE, "Welcome to the tour",
-          "NXtify shows you around its own screens, using your music. {A} or Next moves on, {B} or Back goes back, "
+          "SpotiBacán shows you around its own screens, using your music. {A} or Next moves on, {B} or Back goes back, "
           "Chapters jumps to a topic and × ends the tour. Choose how deep to go:",
           page(View::Now), {} },
         // ---- Playing
@@ -118,12 +118,12 @@ const std::vector<TourStep>& App::tourStepsAt(int level) {
           page(View::Queue), { { "@main" } } },
         { 2, 1, ICON_TAG, "Tags, covers and details",
           "The track menu also edits its tags (title, artist, album, genre, year…) and changes its cover with any image on "
-          GF_THE_CARD ", for one track or the whole album. NXtify keeps your changes apart: your files are never "
+          GF_THE_CARD ", for one track or the whole album. SpotiBacán keeps your changes apart: your files are never "
           "touched, and Undo puts them back. Details shows its plays and its loudness.",
           page(View::Queue), { { "@main" } } },
         // ---- Library
         { 0, 2, ICON_GRID, "The sidebar",
-          "NXtify lets you browse NXtify and control playback. Inicio, Playlist, Albums, "
+          "SpotiBacán lets you browse SpotiBacán and control playback. Inicio, Playlist, Albums, "
           "Artists and Library each show it a different way. Settings > Appearance > Sidebar can reorder these tabs, "
           "hide some, or add dividing lines.",
           nullptr, { { "nav.now" }, { "nav.home" }, { "nav.queue" }, { "nav.albums" }, { "nav.artists" }, { "nav.library" } } },
@@ -144,7 +144,7 @@ const std::vector<TourStep>& App::tourStepsAt(int level) {
           "Try them on Liked or any playlist: the view you pick there stays with that page.",
           page(View::List, -1), { { "pl.view", 0 }, { "pl.view", 1 }, { "pl.view", 2 }, { "pl.view", 3 } } },
         { 1, 2, ICON_HOME, "Inicio",
-          "Recommended music and mixes, updated live from NXtify.",
+          "Recommended music and mixes, updated live from SpotiBacán.",
           [](App& a) { a.navigate(View::Home, -1, {}, false); },
           { { "@main" } } },
         { 1, 2, ICON_SEARCH, "Search",
@@ -172,7 +172,7 @@ const std::vector<TourStep>& App::tourStepsAt(int level) {
           "create it, and stays up to date as you play.",
           nullptr, { { "nav.newpl" } } },
         { 0, 3, ICON_SPARKLE, "Automix playlists",
-          "An Automix playlist plays like a DJ set. NXtify listens to each song once, puts them in the order where they "
+          "An Automix playlist plays like a DJ set. SpotiBacán listens to each song once, puts them in the order where they "
           "join best, and blends one into the next on the beat, on the drop, or through its fade. For example: + › "
           "Automix playlist…, then tick a few albums.",
           nullptr, { { "nav.newpl" } } },
@@ -187,7 +187,7 @@ const std::vector<TourStep>& App::tourStepsAt(int level) {
           "their order is the point.",
           page(View::Queue), { { "nav.playlists" } } },
         { 1, 3, PLI_MOOD, "Mood playlists",
-          "A Mood playlist sorts your library by how it sounds: Happy, Party, Relaxed, Sad or Aggressive. NXtify "
+          "A Mood playlist sorts your library by how it sounds: Happy, Party, Relaxed, Sad or Aggressive. SpotiBacán "
           "measures each song on " GF_THE_CONSOLE ", so the list fills in as it goes. For example: + › Mood playlist…, then "
           "Relaxed for a quiet evening.",
           page(View::Queue), { { "nav.newpl" } } },
@@ -203,7 +203,7 @@ const std::vector<TourStep>& App::tourStepsAt(int level) {
 #ifndef GF_WINDOWED
         { 2, 3, ICON_GAME, "A playlist for a game",
           "Games on a playlist's page makes it start by itself when a game opens, on the HOME menu, back in the game or "
-          "when it closes: where it was left, or shuffled afresh. The background player plays it, with NXtify closed.",
+          "when it closes: where it was left, or shuffled afresh. The background player plays it, with SpotiBacán closed.",
           page(View::List, -1), { { "pl.games" } } },
 #endif
         // ---- Files
@@ -257,7 +257,7 @@ const std::vector<TourStep>& App::tourStepsAt(int level) {
         // ---- Background player and overlay
 #ifndef GF_WINDOWED
         { 0, 7, ICON_GAME, "The background player",
-          "The background player keeps the music going on the HOME menu, in games, and after NXtify is closed. Game "
+          "The background player keeps the music going on the HOME menu, in games, and after SpotiBacán is closed. Game "
           "actions decide what it does when a game opens, when you go to HOME, when you return and when the game "
           "closes: nothing, play, resume, pause, or start one of your playlists.",
           settings(App::SetPlayback), { { "set.bg" } } },   // drawTour scrolls the page to it
@@ -267,12 +267,12 @@ const std::vector<TourStep>& App::tourStepsAt(int level) {
           settings(App::SetPlayback), { { "set.bgfout" }, { "set.bgfin" } } },
         { 0, 7, ICON_GAME, "The overlay",
           "While a game is running, open Ultrahand ({L} + {BTN-DOWN} + a click of the right stick {RS}, unless you changed it) and choose "
-          "NXtify. From there you control the music, the queue, game actions, the equalizer, the sleep timer and the "
+          "SpotiBacán. From there you control the music, the queue, game actions, the equalizer, the sleep timer and the "
           "volume without leaving the game.",
           nullptr, {} },
         { 2, 7, ICON_FOLDER, "Browsing in the overlay",
           "The overlay's Browse opens your folders, or your playlists by kind: Normal, Smart, Mood and Automix, each with "
-          "NXtify's own icons. Play from any track, add one or all to the queue, all without leaving the game.",
+          "SpotiBacán's own icons. Play from any track, add one or all to the queue, all without leaving the game.",
           nullptr, {} },
 #endif
         // ---- Settings
@@ -281,26 +281,26 @@ const std::vector<TourStep>& App::tourStepsAt(int level) {
           "timer, " GF_THE_CONSOLE "'s sleep and the screen dimming.",
           settings(0), { { "@settingsCats" } } },
         { 2, 8, ICON_FOLDER, "Storage",
-          "Where each browser opens, where backups go, and what NXtify keeps " GF_KEPT_WHERE " (covers, measurements, "
+          "Where each browser opens, where backups go, and what SpotiBacán keeps " GF_KEPT_WHERE " (covers, measurements, "
           "tags), each with its size and a Clear button.",
           settings(App::SetStorage), { { "@main" } } },
         { 1, 8, ICON_HISTORY, "Backups and resets",
-          "Back up the settings now keeps a copy you can restore later, and NXtify backs up by itself before every "
+          "Back up the settings now keeps a copy you can restore later, and SpotiBacán backs up by itself before every "
           "update. Reset settings puts every setting back as it came. Factory reset erases what you choose, or "
           "everything.",
           settings(App::SetReset), { { "set.backupnow" }, { "set.reset" }, { "set.factory" } } },
         { 1, 8, ICON_DOWNLOAD, "Updates",
-          "Updates stays off until you turn it on. Then NXtify can check GitHub for new versions, show what changed, "
-          "install one, or go back to an earlier one, and fetch new Automix models. With it off, NXtify never goes "
+          "Updates stays off until you turn it on. Then SpotiBacán can check GitHub for new versions, show what changed, "
+          "install one, or go back to an earlier one, and fetch new Automix models. With it off, SpotiBacán never goes "
           "online.",
           settings(App::SetUpdates), { { "set.updon" } } },
         { 2, 8, ICON_BOLT, "Betas and Automix models",
           "Beta versions lets you try new features before they are released: they can have bugs, so please report what "
           "you find. Automix models brings new ways of joining songs, downloaded and checked, and you can always go back "
-          "to the one NXtify came with.",
+          "to the one SpotiBacán came with.",
           settings(App::SetUpdates), { { "set.updbeta" }, { "set.model" } } },
         { 1, 8, ICON_HELP, "Support",
-          "Found a bug, or have an idea? Support sends it straight to NXtify's developer, with what helps to fix it: "
+          "Found a bug, or have an idea? Support sends it straight to SpotiBacán's developer, with what helps to fix it: "
           GF_VERSIONS_WORDS ". It stays off until you "
           "turn it on.",
           settings(App::SetSupport), { { "set.repon" } } },

@@ -93,9 +93,9 @@ std::string App::updateStatus() const {
 
 /** Updates are off until allowed here: what going online means, said before anything does. */
 void App::allowUpdates() {
-    confirm(UPD_SHIELD, tr("Updates", "Actualizaciones"), tr("Connect to the internet?", "Conectar a internet?"), "GitHub · noesio582-boop/NXtify", tr("Allow NXtify to go online?", "Permitir a NXtify conectarse?"),
-            tr("NXtify connects to GitHub only when you check for updates or install one, and at launch if enabled. GitHub sees your IP address and NXtify version, nothing else.",
-               "NXtify se conecta a GitHub solo para buscar actualizaciones o instalar una, y al iniciar si esta activado. GitHub ve tu direccion IP y la version de NXtify, nada mas."),
+    confirm(UPD_SHIELD, tr("Updates", "Actualizaciones"), tr("Connect to the internet?", "Conectar a internet?"), "GitHub · ohquebacan/SpotiBacan-NX", tr("Allow SpotiBacán to go online?", "Permitir a SpotiBacán conectarse?"),
+            tr("SpotiBacán connects to GitHub only when you check for updates or install one, and at launch if enabled. GitHub sees your IP address and SpotiBacán version, nothing else.",
+               "SpotiBacán se conecta a GitHub solo para buscar actualizaciones o instalar una, y al iniciar si esta activado. GitHub ve tu direccion IP y la version de SpotiBacán, nada mas."),
             tr("Allow", "Permitir"), [this] {
                 store.updates = 1;
                 persistSoon(0.3f);
@@ -151,7 +151,7 @@ void App::updateTick() {
             if (n >= 0) {
                 openRelease(n);
             } else {
-                toast(tr("NXtify is up to date", "NXtify esta actualizado"));
+                toast(tr("SpotiBacán is up to date", "SpotiBacán esta actualizado"));
             }
             if (!newModel.empty()) {
                 store.modelToasted = newModel;
@@ -174,8 +174,8 @@ void App::updateTick() {
                 tr("Update", "Actualizacion"),
                 Updater::releaseName(updater.installed.version),
                 tr("Update installed successfully", "Actualizacion instalada con exito"),
-                tr("Restart NXtify now to apply changes?", "Deseas reiniciar NXtify ahora para aplicar los cambios?"),
-                tr("NXtify will close and restart with the new version.", "NXtify se cerrara y reiniciara con la nueva version."),
+                tr("Restart SpotiBacán now to apply changes?", "Deseas reiniciar SpotiBacán ahora para aplicar los cambios?"),
+                tr("SpotiBacán will close and restart with the new version.", "SpotiBacán se cerrara y reiniciara con la nueva version."),
                 tr("Restart now", "Reiniciar ahora"),
                 [this] { finishUpdate(); });
         sheet.askSafe = true;
@@ -316,7 +316,7 @@ void App::modelSheetHeader(const char*& icon, std::string& kick, std::string& ti
     icon = ICON_SPARKLE;
     kick = std::string("Automix model · ") + (row.name == mixName() ? "In use" : row.builtin ? "Built in" : row.downloaded ? "Downloaded" : "Available");
     title = row.name;
-    sub = row.builtin ? "Comes with NXtify" : m ? longDate(m->date) + " · " + std::to_string(std::max<int64_t>(1, m->size / 1024)) + " KB" : "Downloaded";
+    sub = row.builtin ? "Comes with SpotiBacán" : m ? longDate(m->date) + " · " + std::to_string(std::max<int64_t>(1, m->size / 1024)) + " KB" : "Downloaded";
 }
 
 void App::modelSheetRows(std::vector<SheetRow>& rows) {
@@ -339,7 +339,7 @@ void App::modelSheetRows(std::vector<SheetRow>& rows) {
         rows.push_back({ Row::Action, ICON_CHECK, "In use", "It plans every join, and the order of Automix playlists ordered again", "", nullptr });
     } else if (row.builtin || row.downloaded) {
         rows.push_back({ Row::Action, row.builtin ? ICON_HISTORY : ICON_SPARKLE, (row.builtin ? "Go back to " : "Use ") + name,
-                         row.builtin ? "NXtify's own model: back to it at any time" : "From the next join", "", [this, name] { useModel(name); } });
+                         row.builtin ? "SpotiBacán's own model: back to it at any time" : "From the next join", "", [this, name] { useModel(name); } });
     } else if (updater.busy()) {
         rows.push_back({ Row::Action, ICON_HOURGLASS, updater.working() == name ? updateStatus() : "Busy with " + updater.working(),
                          "Settings › Updates shows how far", "", nullptr });
@@ -348,7 +348,7 @@ void App::modelSheetRows(std::vector<SheetRow>& rows) {
         rows.push_back({ Row::Action, ICON_DOWNLOAD, "Download and use", "Checked by its checksum, kept in " GF_CONFIG_NAME "/models",
                          std::to_string(std::max<int64_t>(1, m->size / 1024)) + " KB", [this, offer] { downloadModel(offer); } });
     } else {
-        text(ICON_INFO, why.empty() ? "It needs a newer NXtify" : why, true);
+        text(ICON_INFO, why.empty() ? "It needs a newer SpotiBacán" : why, true);
     }
     if (!rows.empty() && rows.back().kind == Row::Action) rows.back().h = 62;
     rows.push_back({ Row::Group, nullptr, "What's new" });
@@ -357,7 +357,7 @@ void App::modelSheetRows(std::vector<SheetRow>& rows) {
     else if (m && !m->notes.empty()) for (const std::string& n : m->notes) text(nullptr, n);
     else text(nullptr, "This model has no notes.");
     text(ICON_INFO, "A model comes over the air when only its numbers change. One that needs new logic (a new kind of join) or a new "
-                    "analysis comes with a NXtify update.");
+                    "analysis comes with a SpotiBacán update.");
 }
 
 void App::installRelease(int i) {
@@ -367,8 +367,8 @@ void App::installRelease(int i) {
     const UpdRelease& r = updater.releases[size_t(i)];
     const std::string me = Updater::thisVersion();
     const int cmp = Updater::compare(r.version, me);
-    std::string text = tr("Your settings are backed up first. Then files are downloaded and updated; restarting NXtify finishes it.",
-                          "Tus ajustes se respaldan primero. Luego se descargan y actualizan los archivos; reiniciar NXtify completa la instalacion.");
+    std::string text = tr("Your settings are backed up first. Then files are downloaded and updated; restarting SpotiBacán finishes it.",
+                          "Tus ajustes se respaldan primero. Luego se descargan y actualizan los archivos; reiniciar SpotiBacán completa la instalacion.");
     if (cmp < 0) {
         text += tr(" Your playlists and Liked stay.", " Tus playlists y Me gusta se conservan.");
     }
@@ -392,7 +392,7 @@ void App::installRelease(int i) {
 
 void App::restoreBackup(const UpdBackup& b) {
     confirm(ICON_HISTORY, "Backups", b.name, b.note, "Put these settings back?",
-            "Your settings now are backed up first. Then NXtify restarts with these: settings, playlists, Liked, edits and statistics "
+            "Your settings now are backed up first. Then SpotiBacán restarts with these: settings, playlists, Liked, edits and statistics "
             "as they were then.",
             "Restore and restart", [this, path = b.path] {
                 persistNow();
@@ -424,7 +424,7 @@ void App::restoreBackup(const UpdBackup& b) {
  * the next launch (dropped in memory, not on the card).
  */
 void App::resetSettings() {
-    confirm(ICON_REFRESH, "Reset", "Reset settings", "Every setting, as NXtify came", "Reset every setting?",
+    confirm(ICON_REFRESH, "Reset", "Reset settings", "Every setting, as SpotiBacán came", "Reset every setting?",
             "Colours, the sidebar, playback, the equalizer, lyrics, the Canvas, the visualizer, controls, where browsers open, "
             GF_RESET_LIST " Only settings: your music "
             "folder, playlists, Liked, tag edits, covers, statistics and saved presets stay (Factory reset, below, erases those).",
@@ -470,7 +470,7 @@ struct FactoryPartInfo { const char* label; const char* sub; };
 // In App::FactoryPart's order (and Updater::factoryFiles')
 const FactoryPartInfo kFactoryParts[] = {
     { "Settings", GF_FACTORY_SET },
-    { "Music folder", "NXtify asks where your music is again, as at its first start" },
+    { "Music folder", "SpotiBacán asks where your music is again, as at its first start" },
     { "Playlists", "Your playlists, smart and folder ones, and their icons" },
     { "Liked", "Every track you liked" },
     { "Tag edits and covers", "Tags you edited and covers you chose (your music files were never changed)" },
@@ -506,11 +506,11 @@ void App::factoryRows(std::vector<SheetRow>& rows) {
     int n = 0;
     for (int k = 0; k < FacParts; k++) n += (factoryPick >> k) & 1;
     rows.push_back({ SheetRow::Action, ICON_X, "Erase what is ticked",
-                     n ? std::to_string(n) + " of " + std::to_string(int(FacParts)) + " ticked: they go when NXtify closes and starts again"
+                     n ? std::to_string(n) + " of " + std::to_string(int(FacParts)) + " ticked: they go when SpotiBacán closes and starts again"
                        : "Tick what to erase above first",
                      "", n ? std::function<void()>([this] { factoryErase(factoryPick); }) : nullptr });
     rows.back().h = 60;
-    rows.push_back({ SheetRow::Action, ICON_X, "Erase everything", "As if NXtify were newly installed: every part above, and the rest", "",
+    rows.push_back({ SheetRow::Action, ICON_X, "Erase everything", "As if SpotiBacán were newly installed: every part above, and the rest", "",
                      [this] { factoryErase(~0u); } });
     rows.back().h = 60;
 }
@@ -533,16 +533,16 @@ void App::factoryErase(unsigned mask) {
         for (int k = 0; k < FacParts; k++)
             if (mask & (1u << k)) list += (list.empty() ? "" : ", ") + std::string(kFactoryParts[k].label);
         confirm(ICON_X, "Factory reset", "Erase what is ticked", list, "Erase these for good?",
-                "Erased: " + list + ". NXtify closes now and starts again without them. Only a backup made before can bring them back; "
+                "Erased: " + list + ". SpotiBacán closes now and starts again without them. Only a backup made before can bring them back; "
                 "your music files and backups in " + backupRoot() + " stay.",
                 "Erase", go);
         sheet.askWarn = "THIS CANNOT BE UNDONE";
         return;
     }
-    confirm(ICON_X, "Factory reset", "Erase everything", "NXtify as if it were newly installed", "Erase everything NXtify keeps?",
+    confirm(ICON_X, "Factory reset", "Erase everything", "SpotiBacán as if it were newly installed", "Erase everything SpotiBacán keeps?",
             "Every setting, playlist and Liked track; your tag edits, chosen covers, lyric timings and saved equalizer presets; play "
             "counts and statistics; " GF_FACTORY_LIST " "
-            "NXtify then closes and starts again as new. Your music files are not touched, and backups in " + backupRoot() + " stay.",
+            "SpotiBacán then closes and starts again as new. Your music files are not touched, and backups in " + backupRoot() + " stay.",
             "Erase everything", [this, go] {
                 confirm(ICON_X, "Factory reset", "Are you absolutely sure?", "There is no way back", "Erase everything now?",
                         "Only a backup made before can bring any of it back. If you might want your playlists, Liked or settings "

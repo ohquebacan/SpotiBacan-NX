@@ -75,6 +75,11 @@ class QueuedTrack {
 
   void expire();
 
+  // SpotiBacan: the downloader fetches the whole file itself (CDNAudioFile
+  // never returns its last chunk), so it needs the resolved URL and key.
+  const std::string& getCdnUrl() const { return cdnUrl; }
+  const std::vector<uint8_t>& getAudioKey() const { return audioKey; }
+
  private:
   std::shared_ptr<cspot::Context> ctx;
 

@@ -37,14 +37,14 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   of a homebrew executable (.nro). This is intended to be used for sysmodules.
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
-TARGET		:=	NXtify
+TARGET		:=	SpotiBacan
 BUILD		:=	build
 SOURCES		:=	source platform/switch
 DATA		:=	data
 INCLUDES	:=	source platform/switch sysmodule/include ../phase2/ipc-client/include ../phase2/common/include ../vendor/cspot/include ../vendor/cspot/pregen ../vendor/cspot/pregen/protobuf ../vendor/cspot/bell/main ../vendor/cspot/bell/main/utilities/include ../vendor/cspot/bell/main/io/include ../vendor/cspot/bell/main/platform ../vendor/cspot/bell/main/audio-dsp/include ../vendor/cspot/bell/main/audio-containers/include ../vendor/cspot/bell/main/audio-codec/include ../vendor/cspot/bell/external/nanopb ../vendor/cspot/bell/external/cJSON ../vendor/cspot/bell/external/mdnssvc ../vendor/cspot/bell/external/nlohmann_json/include ../vendor/cspot/bell/external/nlohmann_json/single_include ../vendor/cspot/bell/external/fmt/include
-APP_TITLE	:=	NXtify
-APP_AUTHOR	:=	noesio582-boop
-APP_VERSION	:=	0.9.6
+APP_TITLE	:=	SpotiBacán
+APP_AUTHOR	:=	OH! QUÉ BACÁN (base: NXtify y Switify)
+APP_VERSION	:=	1.0.0
 ROMFS	:=	romfs
 
 #---------------------------------------------------------------------------------

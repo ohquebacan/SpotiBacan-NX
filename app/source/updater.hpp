@@ -35,7 +35,7 @@ struct UpdLog { std::string icon, title; std::vector<UpdItem> items; };       //
 struct UpdFile { std::string path; int64_t size = 0; std::string sha256; };     // path from the SD card's root
 
 // Where bugs are reported (Settings › Updates: the betas' warning); the repository is NXtify
-#define ISSUES_URL "github.com/noesio582-boop/NXtify/issues"
+#define ISSUES_URL "github.com/ohquebacan/SpotiBacan-NX/issues"
 
 struct UpdRelease {
     std::string tag, version, name, date, body;   // date: "2026-10-27"; body: the GitHub notes (Markdown)

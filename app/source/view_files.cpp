@@ -390,7 +390,7 @@ void App::fileDelete(const std::string& path) {
                                 : kindName(kindOf(name, false), name) + " · " + fmtSize(bytes = [&] { struct stat st; return stat(path.c_str(), &st) == 0 ? uint64_t(st.st_size) : 0; }());
     std::string text = dir ? "Everything in it is deleted from " GF_THE_CARD ". This cannot be undone." : "It is deleted from " GF_THE_CARD ". This cannot be undone.";
     if (inMusicFolder(path)) text += " Your library is read again after.";
-    if (systemPath(path)) text = "This is part of " GF_YOUR_CONSOLE "'s setup (or NXtify's own settings): deleting it can stop " GF_SYSTEM_WORDS " "
+    if (systemPath(path)) text = "This is part of " GF_YOUR_CONSOLE "'s setup (or SpotiBacán's own settings): deleting it can stop " GF_SYSTEM_WORDS " "
                                  "from working. " + text;
     confirm(dir ? ICON_FOLDER : kindIcon(kindOf(name, false)), "Delete", name, sub, dir ? "Delete this folder?" : "Delete this file?", text, "Delete",
             [this, path, name, dir, n] {
@@ -435,7 +435,7 @@ void App::fileDeleteMany(const std::vector<std::string>& paths) {
     }
     std::string text = "Everything selected is deleted from " GF_THE_CARD ", folders with all that is in them. This cannot be undone.";
     if (inLib) text += " Your library is read again after.";
-    if (sys) text = "Some of it is part of " GF_YOUR_CONSOLE "'s setup (or NXtify's own settings): deleting it can stop " GF_SYSTEM_WORDS " "
+    if (sys) text = "Some of it is part of " GF_YOUR_CONSOLE "'s setup (or SpotiBacán's own settings): deleting it can stop " GF_SYSTEM_WORDS " "
                     "from working. " + text;
     const std::string what = std::to_string(paths.size()) + " items";
     confirm(ICON_X, "Delete", what, std::to_string(n) + (n == 1 ? " file · " : " files · ") + fmtSize(bytes), "Delete " + what + "?", text, "Delete",
@@ -843,7 +843,7 @@ void App::fileSheetRows(std::vector<SheetRow>& rows) {
                                  } });
         }
         if (strcasecmp(p.c_str(), store.musicRoot.c_str()) != 0)
-            rows.push_back({ Row::Action, ICON_GRID, "Use as the music folder", "NXtify reads your library from here (Settings · Library)", "", [this, p] {
+            rows.push_back({ Row::Action, ICON_GRID, "Use as the music folder", "SpotiBacán reads your library from here (Settings · Library)", "", [this, p] {
                                  closeSheet();
                                  useMusicFolder(p);
                              } });
@@ -873,7 +873,7 @@ void App::fileSheetRows(std::vector<SheetRow>& rows) {
                 rows.push_back({ Row::Action, ICON_V_GRID, "Show its album", tr.album, "", [this, a = tr.albumIdx] { closeSheet(); goToAlbum(a); } });
             rows.push_back({ Row::Action, ICON_MORE, "Track menu…", "Tags, cover, details", "", [this, t] { openTrackMenu(t); } });
         } else {
-            rows.push_back({ Row::Action, ICON_INFO, "Not in your library", "NXtify plays what is in its music folder (Settings · Library)", "", nullptr });
+            rows.push_back({ Row::Action, ICON_INFO, "Not in your library", "SpotiBacán plays what is in its music folder (Settings · Library)", "", nullptr });
         }
     } else if (k == Kind::Image) {
         const std::string img = p;
@@ -896,7 +896,7 @@ void App::fileSheetRows(std::vector<SheetRow>& rows) {
                                  closeSheet();
                                  setCoverFor(img, lib.folders[size_t(fo)].tracks);
                              } });
-        rows.push_back({ Row::Action, ICON_INFO, "Kept by NXtify", "A copy goes in NXtify's folder; your music files are not changed", "", nullptr });
+        rows.push_back({ Row::Action, ICON_INFO, "Kept by SpotiBacán", "A copy goes in SpotiBacán's folder; your music files are not changed", "", nullptr });
     } else if (k == Kind::Lyrics) {
         if (now.track >= 0)
             rows.push_back({ Row::Action, ICON_DISC, "Lyrics of the track playing", lib.tracks[size_t(now.track)].title, "", [this, p] {

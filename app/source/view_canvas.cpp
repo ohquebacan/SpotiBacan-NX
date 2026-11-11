@@ -308,7 +308,7 @@ void App::drawCanvas() {
         if (has && in.date.size() >= 4) al += (al.empty() ? "" : " · ") + in.date.substr(0, 4);
         return al;
     };
-    const std::string title = has ? now.info.title : "NXtify";
+    const std::string title = has ? now.info.title : "SpotiBacán";
     // a Simple join (Settings › Appearance › Automix › On the Canvas): the outgoing song's title, artist, album and lyrics give
     // way to the next one's, from left to right, timed to the join (the user, 2026-10-29); else the song's own
     const bool give = simple && mixOld.on;

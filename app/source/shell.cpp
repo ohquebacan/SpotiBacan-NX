@@ -346,7 +346,7 @@ void App::drawTitlebar() {
         const float wx = x + 2 - 10 * (1 - ina);
         g.clip(wx - 12, 0, 220.f * std::min(1.f, in * 1.25f) + 12, css::TbH);
         g.icon(ICON_SPOTIFY, wx + 12, cy, 22, pal.accent);
-        g.textC("NXtify", { 21, Weight::Bold }, wx + 32, cy, mix(pal.accent, pal.text, 0.15f), ina);
+        g.textC("SpotiBacán", { 21, Weight::Bold }, wx + 32, cy, mix(pal.accent, pal.text, 0.15f), ina);
         g.unclip();
     }
 
@@ -835,7 +835,7 @@ void App::drawPlayerbar() {
 void App::backgroundJobs(Job (&jobs)[JobSlots], bool (&busy)[JobSlots]) {
     const int n = int(lib.tracks.size());
     const int pos = meta.sweepPos(), cached = meta.coversCached();
-    if (libCheck_.joinable() && !libCheckDone_) { jobs[0] = { tr("Syncing library", "Sincronizando biblioteca"), 0, 0, SetLibrary, Stoppable::None, "NXtify" }; busy[0] = true; }
+    if (libCheck_.joinable() && !libCheckDone_) { jobs[0] = { tr("Syncing library", "Sincronizando biblioteca"), 0, 0, SetLibrary, Stoppable::None, "SpotiBacán" }; busy[0] = true; }
     else if (!store.stopCovers && pos > 0 && pos < n && cached < n) {
         jobs[0] = { tr("Preparing covers", "Preparando portadas"), std::min(cached, n), n, SetLibrary, Stoppable::Covers, tr("Covers ready", "Portadas listas") };
         busy[0] = true;

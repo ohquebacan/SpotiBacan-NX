@@ -594,6 +594,12 @@ bool SpotifyApi::authenticate() {
     return true;
 }
 
+std::string SpotifyApi::webAccessToken() {
+    std::scoped_lock lock(mutex_);
+    if (!authenticate()) return {};
+    return accessToken_;
+}
+
 bool SpotifyApi::requestClientToken() {
     std::string netErr;
     if (!net::begin(netErr)) {

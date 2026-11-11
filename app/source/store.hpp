@@ -146,7 +146,7 @@ struct Store {
         default: return tr("Line", "Linea");
         }
     }
-    int lang = 0;   // 0 = English, 1 = Español
+    int lang = 1;   // 0 = English, 1 = Español (SpotiBacan: español por defecto)
     std::vector<int> tabOrder = { TabHome, TabNow, TabAlbums, TabArtists };
     bool showHidden = false;   // Files: names starting with a dot
     // Settings → Storage and reset → Folders: where each browser starts (empty: its own default)

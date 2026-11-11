@@ -15,7 +15,7 @@ void App::drawHome(float x, float y, float w, float h) {
     bg.pollBrowse(page);
 
     float cy = oy + 18 + 8;
-    kicker("NXtify", x + 28, cy, pal.accent);
+    kicker("SpotiBacán", x + 28, cy, pal.accent);
     cy += 10;
     const std::string title = (page.title.empty() || page.title == "Inicio") ? tr("Home", "Inicio") : page.title;
     g.text(title, { css::Xxl, Weight::Bold }, x + 28, cy, pal.text, 1, Align::Left, int(w - 56));
@@ -40,7 +40,7 @@ void App::drawHome(float x, float y, float w, float h) {
         g.icon(ICON_SPARKLE, x + w / 2, cy + 90, 28, pal.accent);
         cy += 140;
     } else if (page.state == 3) { // Error
-        std::string errMsg = page.message.empty() ? tr("Could not connect to NXtify", "No se pudo conectar con NXtify") : page.message;
+        std::string errMsg = page.message.empty() ? tr("Could not connect to SpotiBacán", "No se pudo conectar con SpotiBacán") : page.message;
         g.textC(errMsg, { css::Base }, x + w / 2, cy + 50, pal.text2, 0.8f, Align::Center);
         bool retryClicked = false;
         button(uid("home.retry"), ICON_REFRESH, tr("Retry", "Reintentar"), x + w / 2 - 60, cy + 85, true, &retryClicked);

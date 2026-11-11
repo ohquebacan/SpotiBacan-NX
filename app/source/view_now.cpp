@@ -57,7 +57,7 @@ void App::drawNow(float x, float y, float w, float h) {
     // .np-title: Inter 760, clamp(30px, 4.2vw, 52px), line-height 1.04; a title that needs two lines steps down
     // to 42 px, because at 720 p every line it takes is a row of Up next.
     Font titleF{ css::Hero, Weight::ExtraBold };
-    const std::string titleText = has ? now.info.title : "NXtify";
+    const std::string titleText = has ? now.info.title : "SpotiBacán";
     std::vector<std::string> title = g.wrap(titleText, titleF, int(iw), 2);
     if (title.size() > 1) { titleF.size = 42; title = g.wrap(titleText, titleF, int(iw), 2); }
     const float titleLH = std::round(titleF.size * 1.04f);

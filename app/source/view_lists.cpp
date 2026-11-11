@@ -3,6 +3,8 @@
  * Track lists: #view-playlist (play queue, Liked, folder playlists, search),
  * #view-album, and the Folders browser that Gatefold NX adds.
  */
+#include "downloader.hpp"
+#include "logger.hpp"
 #include "words.hpp"
 #include <algorithm>
 #include <cmath>
@@ -49,6 +51,28 @@ void App::drawTrackList(float x, float y, float w, float h) {
         placeholder = playlistIcon(route.ref);
     }
     sub = fmtTotal(tracks);
+    // SpotiBacan: las canciones de Spotify de esta lista, para «Descargar», y como va la descarga
+    std::vector<DlJob> dlJobs;
+    int dlHave = 0;
+    if (v != View::Queue && v != View::Search) {
+        for (int ti : tracks) {
+            if (ti < 0 || ti >= int(lib.tracks.size())) continue;
+            const Track& t = lib.tracks[ti];
+            if (t.path.rfind("spotify:track:", 0) != 0) continue;
+            DlJob j{ t.path, t.title, t.albumArtist.empty() ? t.artist : t.albumArtist, t.album, t.trackNo };
+            if (Downloader::isDownloaded(j)) ++dlHave;
+            else dlJobs.push_back(std::move(j));
+        }
+        const Downloader::Status ds = Downloader::instance().status();
+        if (ds.active) {
+            char pc[48];
+            snprintf(pc, sizeof pc, "  ·  descargando (%d en cola, %d%%)", ds.pending + 1, int(ds.progress * 100));
+            sub += pc;
+        } else if (dlHave > 0) {
+            sub += "  ·  " + std::to_string(dlHave) + (dlHave == 1 ? " descargada" : " descargadas");
+        }
+        if (ds.keyDenied > 0 && !ds.active) sub += "  ·  Spotify nego la clave de audio (probablemente por la cuenta)";
+    }
     if (v == View::List && route.ref >= 0 && route.ref < int(store.playlists.size())) {   // an Automix playlist building up
         const FolderPlaylist& p = store.playlists[route.ref];
         if (p.automix && p.waiting && !p.manual) {
@@ -118,6 +142,7 @@ void App::drawTrackList(float x, float y, float w, float h) {
         else if (ref >= 0) need += bw("Open folder") + bw("Delete");
         if (v == View::List && bgShown()) need += bw("Games");
         if (v != View::Search) need += bw("Export");
+        need += bw("Descargar");
         if (ownPage) need += 34 + 8;
         compact = tx + need > x + w - 28 - (6 + 38 * 4) - 16;
     }
@@ -143,6 +168,10 @@ void App::drawTrackList(float x, float y, float w, float h) {
     if (!noShuffle) {
         bx += button(uid("pl.shuffle"), ICON_SHUFFLE, tr("Shuffle", "Aleatorio"), bx, by, false, &clicked) + 8;
         if (clicked && !tracks.empty()) playTracks(tracks, 0, playName, true);
+    }
+    if (!dlJobs.empty() && action("pl.download", ICON_DOWNLOAD, tr("Download", "Descargar"))) {
+        const int n = Downloader::instance().enqueue(dlJobs);
+        LOG("Descargar esta lista: %d canciones nuevas en cola", n);
     }
     if (v == View::Queue) {
         clicked = action("pl.jump", ICON_DISC, tr("Current track", "Cancion actual"));

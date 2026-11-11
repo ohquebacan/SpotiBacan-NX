@@ -473,13 +473,13 @@ void App::drawSettings(float x, float y, float w, float h) {
         // The background player (sysmodule): music on the HOME menu and in games, and its pause-for-apps.
         std::vector<Row> bgRows;
 #ifdef GF_WINDOWED
-        bgRows.push_back(toggleRow(tr("Keep playing when the window closes", "Seguir reproduciendo al cerrar la ventana"), tr("NXtify stays by the clock, playing; its icon brings it back. Off: closing the window quits", "NXtify sigue reproduciendo en segundo plano"),
+        bgRows.push_back(toggleRow(tr("Keep playing when the window closes", "Seguir reproduciendo al cerrar la ventana"), tr("SpotiBacán stays by the clock, playing; its icon brings it back. Off: closing the window quits", "SpotiBacán sigue reproduciendo en segundo plano"),
                                    "set.bg", store.background));
 #else
         const bool on = player.remote();
         bgRows.push_back(infoRow(tr("Background playback", "Reproduccion en segundo plano"),
-                                 on ? tr("Connected to the NXtify sysmodule. Music plays continuously on the HOME menu and during games.",
-                                         "Conectado al sysmodule de NXtify. La musica se reproduce de forma continua en el menu HOME y durante los juegos.")
+                                 on ? tr("Connected to the SpotiBacán sysmodule. Music plays continuously on the HOME menu and during games.",
+                                         "Conectado al sysmodule de SpotiBacán. La musica se reproduce de forma continua en el menu HOME y durante los juegos.")
                                     : tr("Disconnected. Make sure the sysmodule is running.",
                                          "Desconectado. Asegurate de que el sysmodule este iniciado.")));
         bgRows.push_back(infoRow(tr("In-game controls", "Controles en juegos"),
@@ -491,8 +491,8 @@ void App::drawSettings(float x, float y, float w, float h) {
         const std::string measuredHint =
             store.levelMode == 0 ? tr("Starts once levelling is on, with the track playing first", "Inicia cuando la nivelacion esta activa, empezando por la cancion actual")
             : store.stopLevels       ? tr("Stopped. Only the track playing and the next ones are measured until you resume", "Detenido. Solo se miden la cancion actual y las siguientes hasta reanudar")
-            : levels.secondsPerTrack() > 0 ? std::string(tr("In the background while NXtify is open, about ", "En segundo plano mientras NXtify esta abierto, aprox. ")) + oneDecimal(levels.secondsPerTrack()) + tr(" s a track", " s por cancion")
-                                     : tr("In the background while NXtify is open, the track playing first", "En segundo plano mientras NXtify esta abierto, empezando por la cancion actual");
+            : levels.secondsPerTrack() > 0 ? std::string(tr("In the background while SpotiBacán is open, about ", "En segundo plano mientras SpotiBacán esta abierto, aprox. ")) + oneDecimal(levels.secondsPerTrack()) + tr(" s a track", " s por cancion")
+                                     : tr("In the background while SpotiBacán is open, the track playing first", "En segundo plano mientras SpotiBacán esta abierto, empezando por la cancion actual");
         Row measuredRow = store.levelMode && (store.stopLevels || measured < lib.tracks.size())
                               ? buttonRow(tr("Measured", "Medidas"), measuredHint, "set.lvlstop", store.stopLevels ? ICON_PLAY : ICON_X,
                                           store.stopLevels ? tr("Resume", "Reanudar") : tr("Stop", "Detener"),
@@ -536,7 +536,7 @@ void App::drawSettings(float x, float y, float w, float h) {
                                static const int mins[] = { 0, 15, 30, 45, 60, 90 };
                                setSleep(mins[i] * 60.0, i);
                            }),
-                    segRow(tr("Then sleep the console", "Luego suspender la consola"), tr("When the timer ends with NXtify open, a card counts down; Stay awake keeps it on", "Cuando termina el temporizador con NXtify abierto, muestra una cuenta regresiva"),
+                    segRow(tr("Then sleep the console", "Luego suspender la consola"), tr("When the timer ends with SpotiBacán open, a card counts down; Stay awake keeps it on", "Cuando termina el temporizador con SpotiBacán abierto, muestra una cuenta regresiva"),
                            "set.sleepcon", { tr("Off", "Apagado"), "10 s", "30 s", "1 min" },
                            store.sleepConsole <= 0 ? 0 : store.sleepConsole <= 10 ? 1 : store.sleepConsole <= 30 ? 2 : 3,
                            [this](int i) {
@@ -544,7 +544,7 @@ void App::drawSettings(float x, float y, float w, float h) {
                                store.sleepConsole = secs[i];
                                persistSoon(0.3f);
                            }),
-                    toggleRow(tr("Keep the console awake", "Mantener la consola despierta"), tr("While NXtify is open the screen does not dim and the console does not sleep by itself. After a sleep timer ends, it may again.", "Mientras NXtify este abierto la pantalla no se atenua ni entra en modo de espera sola."),
+                    toggleRow(tr("Keep the console awake", "Mantener la consola despierta"), tr("While SpotiBacán is open the screen does not dim and the console does not sleep by itself. After a sleep timer ends, it may again.", "Mientras SpotiBacán este abierto la pantalla no se atenua ni entra en modo de espera sola."),
                               "set.awake", store.keepAwake),
                     segRow(tr("Dim the screen", "Atenuar la pantalla"), store.keepAwake ? tr("After this long without input; any button brings it back", "Despues de este tiempo sin tocar botones; cualquier boton la reactiva")
                                                              : tr("With Keep the console awake on; otherwise the console dims by itself", "Con Mantener la consola despierta activo; de lo contrario se atenua sola"),
@@ -671,7 +671,7 @@ void App::drawSettings(float x, float y, float w, float h) {
                                                             { "Y", tr("Search", "Buscar") },           { "L  R", tr("Previous / next track", "Cancion anterior / siguiente") },
                                                             { "ZL  ZR", tr("Seek 10 seconds", "Adelantar / retroceder 10 s") }, { "−", tr("Canvas (full screen)", "Canvas (pantalla completa)") },
                                                             { "+", tr("Track menu", "Menu de la cancion") },
-                                                            { "HOME", tr("Leave NXtify (close it from the HOME menu)", "Salir de NXtify (cerrar desde el menu HOME)") },
+                                                            { "HOME", tr("Leave SpotiBacán (close it from the HOME menu)", "Salir de SpotiBacán (cerrar desde el menu HOME)") },
                                                             { tr("Right stick", "Stick derecho"), tr("Scroll", "Desplazar") },
                                                             { "R3", tr("Recenter pointer", "Recentrar cursor") } };
 #endif
@@ -713,7 +713,7 @@ void App::drawSettings(float x, float y, float w, float h) {
             cards.push_back({
                 tr("Update ready", "Actualizacion lista"),
                 { buttonRow(
-                    tr("Restart NXtify", "Reiniciar NXtify"),
+                    tr("Restart SpotiBacán", "Reiniciar SpotiBacán"),
                     tr("Restart now to complete installing the update", "Reinicia ahora para completar la instalacion"),
                     "set.updrelaunch",
                     ICON_REFRESH,
@@ -736,7 +736,7 @@ void App::drawSettings(float x, float y, float w, float h) {
             else snprintf(b, sizeof(b), "OK");
             checkHint = tr("Last checked: ", "Ultima comprobacion: ") + std::string(b);
         } else {
-            checkHint = tr("Check GitHub for newer versions of NXtify", "Comprobar en GitHub si hay versiones mas recientes de NXtify");
+            checkHint = tr("Check GitHub for newer versions of SpotiBacán", "Comprobar en GitHub si hay versiones mas recientes de SpotiBacán");
         }
 
         checkRows.push_back(buttonRow(
@@ -749,7 +749,7 @@ void App::drawSettings(float x, float y, float w, float h) {
         ));
 
         checkRows.push_back(toggleRow(
-            tr("Check when NXtify starts", "Buscar al iniciar NXtify"),
+            tr("Check when SpotiBacán starts", "Buscar al iniciar SpotiBacán"),
             tr("Automatically check for updates on startup", "Buscar actualizaciones automaticamente al abrir la aplicacion"),
             "set.updstart",
             store.updateAtStart
@@ -813,16 +813,16 @@ void App::drawSettings(float x, float y, float w, float h) {
     {
         std::vector<Card> cards;
         std::vector<Row> rep;
-        rep.push_back(infoRow(tr("Repository", "Repositorio"), "github.com/noesio582-boop/NXtify", "NXtify"));
+        rep.push_back(infoRow(tr("Repository", "Repositorio"), "github.com/ohquebacan/SpotiBacan-NX", "SpotiBacán"));
         if (report::available()) {
-            Row onRow{ tr("Reports", "Reportes"), "", store.reports ? tr("Sent only when you press Send, to NXtify on GitHub, and nowhere else", "Se envian solo al presionar Enviar, al repositorio de NXtify en GitHub")
-                                                     : tr("Off: NXtify sends nothing. On, you can report a bug or suggest a feature from here", "Apagado: NXtify no envia nada. Activalo para reportar un error o sugerir una funcion"),
+            Row onRow{ tr("Reports", "Reportes"), "", store.reports ? tr("Sent only when you press Send, to SpotiBacán on GitHub, and nowhere else", "Se envian solo al presionar Enviar, al repositorio de SpotiBacán en GitHub")
+                                                     : tr("Off: SpotiBacán sends nothing. On, you can report a bug or suggest a feature from here", "Apagado: SpotiBacán no envia nada. Activalo para reportar un error o sugerir una funcion"),
                        40, [this](float rx, float cy) {
                            if (toggle(uid("set.repon"), rx - 40, cy, store.reports)) {
                                if (store.reports) {
                                    store.reports = false;
                                    persistSoon(0.3f);
-                                   toast(tr("Reports off: NXtify sends nothing", "Reportes desactivados: NXtify no envia nada"));
+                                   toast(tr("Reports off: SpotiBacán sends nothing", "Reportes desactivados: SpotiBacán no envia nada"));
                                } else {
                                    allowReports();
                                }
@@ -833,7 +833,7 @@ void App::drawSettings(float x, float y, float w, float h) {
             if (store.reports) {
                 rep.push_back(buttonRow(tr("Report a bug", "Reportar un error"), tr("A short form: what happened, and where", "Un breve formulario: que ocurrio y donde"), "set.repbug", ICON_BUG, tr("Report", "Reportar"),
                                         [this] { openReport(0); }));
-                rep.push_back(buttonRow(tr("Suggest a feature", "Sugerir una funcion"), tr("Something NXtify could do, sent the same way", "Algo que NXtify podria hacer, enviado de la misma forma"), "set.repidea", PLI_BULB, tr("Suggest", "Sugerir"),
+                rep.push_back(buttonRow(tr("Suggest a feature", "Sugerir una funcion"), tr("Something SpotiBacán could do, sent the same way", "Algo que SpotiBacán podria hacer, enviado de la misma forma"), "set.repidea", PLI_BULB, tr("Suggest", "Sugerir"),
                                         [this] { openReport(1); }));
             }
         } else {
@@ -864,7 +864,7 @@ void App::drawSettings(float x, float y, float w, float h) {
             if (now.info.sampleRate > 0) { char r[24]; snprintf(r, sizeof r, " · %.1f kHz", now.info.sampleRate / 1000.0); playing += r; }
         }
         cards.push_back({ tr("Sent with a report", "Enviado con un reporte"),
-                          { infoRow("NXtify", "", Updater::thisVersion()),
+                          { infoRow("SpotiBacán", "", Updater::thisVersion()),
 #ifdef GF_WINDOWED
                             infoRow(tr("System", "Sistema"), "", read ? supportSys_.firmware : std::string("…")),
 #else
@@ -885,7 +885,7 @@ void App::drawSettings(float x, float y, float w, float h) {
             g.roundRect(bx, by + 8, 60, 60, 16, { 0.118f, 0.843f, 0.376f }, 0.16f);
             g.glow(bx + 30, by + 38, 30, { 0.118f, 0.843f, 0.376f }, 0.45f);
             g.icon(ICON_SPOTIFY, bx + 30, by + 38, 36, { 0.118f, 0.843f, 0.376f });
-            g.text(tr("NXtify for " GF_PLATFORM, "NXtify para " GF_PLATFORM), { css::Xl, Weight::Bold }, bx + 76, by + 12, pal.text);
+            g.text(tr("SpotiBacán for " GF_PLATFORM, "SpotiBacán para " GF_PLATFORM), { css::Xl, Weight::Bold }, bx + 76, by + 12, pal.text);
             g.text(tr("Version " GF_VERSION " · by noesio582-boop", "Version " GF_VERSION " · por noesio582-boop"), { css::Base }, bx + 76, by + 46, pal.text2);
         };
         sections.push_back(
@@ -893,7 +893,7 @@ void App::drawSettings(float x, float y, float w, float h) {
               { { "", { head } },
                 { tr("Credits", "Creditos"),
                   { infoRow("noesio582-boop", tr("Project author and maintainer. Switch integration and updates.", "Autor y mantenedor del proyecto. Integracion en Switch y actualizaciones.")),
-                    infoRow("NXtify", tr("Cloud music streaming client and UI application for Nintendo Switch, powered by cspot and librespot. GPL 3.0", "Cliente de musica en la nube e interfaz para Nintendo Switch, impulsado por cspot y librespot. Licencia GPL 3.0")),
+                    infoRow("SpotiBacán", tr("Cloud music streaming client and UI application for Nintendo Switch, powered by cspot and librespot. GPL 3.0", "Cliente de musica en la nube e interfaz para Nintendo Switch, impulsado por cspot y librespot. Licencia GPL 3.0")),
                     infoRow("AndryTheBeast", tr("Creator of the Songate Nintendo Switch homebrew interface. GPL 3.0", "Creador de la interfaz homebrew Songate para Nintendo Switch. Licencia GPL 3.0")),
                     infoRow("HiroshiYamauchi", tr("Original Switch streaming client and background service architecture. GPL 3.0", "Cliente original de streaming en Switch y arquitectura de servicio en segundo plano. Licencia GPL 3.0")),
                     infoRow("Gatefold", tr("Original interface design by DEVIROYrus for foobar2000. MIT licence", "Diseño original de interfaz por DEVIROYrus para foobar2000. Licencia MIT")),
@@ -904,7 +904,7 @@ void App::drawSettings(float x, float y, float w, float h) {
                     infoRow("libcurl & zlib", tr("Network over the console's secure connection. curl and zlib licences", "Red mediante la conexion segura de la consola. Licencias curl y zlib"))
 #ifndef GF_WINDOWED
                     , infoRow("libnx & devkitPro", tr("The Nintendo Switch homebrew toolchain. ISC licence", "El toolchain homebrew de Nintendo Switch. Licencia ISC")),
-                    infoRow(tr("Background player", "Reproductor en segundo plano"), tr("NXtify background sysmodule (0x4200000000535754) and Tesla overlay (libultrahand). GPL 3.0", "Sysmodule en segundo plano de NXtify (0x4200000000535754) y overlay Tesla (libultrahand). GPL 3.0"))
+                    infoRow(tr("Background player", "Reproductor en segundo plano"), tr("SpotiBacán background sysmodule (0x4200000000535754) and Tesla overlay (libultrahand). GPL 3.0", "Sysmodule en segundo plano de SpotiBacán (0x4200000000535754) y overlay Tesla (libultrahand). GPL 3.0"))
 #endif
                   } } } });
     }
@@ -917,7 +917,7 @@ void App::drawSettings(float x, float y, float w, float h) {
     // ------------------------------------------------------------ left column
     const float lx = x + 24, lw = 214;
     float cy = y + 24;
-    kicker("NXtify", lx, cy + 6, pal.text3, 0.14f);
+    kicker("SpotiBacán", lx, cy + 6, pal.text3, 0.14f);
     cy += 16;
     g.text(tr("Settings", "Configuracion"), { css::Xxl, Weight::ExtraBold }, lx - 1, cy, pal.text);
     cy += 50;

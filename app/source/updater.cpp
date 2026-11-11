@@ -24,14 +24,14 @@
 
 namespace {
 
-constexpr const char* kApiUrl = "https://api.github.com/repos/noesio582-boop/NXtify/releases?per_page=30";
+constexpr const char* kApiUrl = "https://api.github.com/repos/ohquebacan/SpotiBacan-NX/releases?per_page=30";
 // Automix's models (the open-source model repository): its latest release's assets, by GitHub's own redirect (no API call)
 constexpr const char* kModels = "https://github.com/AndryTheBeast/songate-automix/releases/latest/download/";
 constexpr const char* kModelsManifest = "songate-automix-models.json";
 constexpr const char* kManifest = "songate-manifest.json";
 constexpr const char* kSysDir = "atmosphere/contents/4200000000535754/";   // the NXtify background player's
 constexpr const char* kSysDirOld = "atmosphere/contents/4200000047464E58/";
-constexpr const char* kNro = "switch/NXtify/NXtify.nro";
+constexpr const char* kNro = "switch/SpotiBacan/SpotiBacan.nro";
 constexpr const char* kOverlay = "switch/.overlays/NXtify.ovl";
 // Before the rebranding (1.x, as Gatefold NX): where its files are, for going back to one, and cleared after (cleanLegacy)
 constexpr const char* kNroV1 = "switch/Gatefold/Gatefold.nro";
@@ -1199,7 +1199,7 @@ void Updater::doInstall(UpdRelease r, bool fresh, std::string backupRoot) {
         prog_.done++;
     }
     fclose(f);
-    if (!hasNro) { undo(); fail("The zip has no NXtify.nro"); return; }
+    if (!hasNro) { undo(); fail("The zip has no SpotiBacan.nro"); return; }
 
     // ---- 3. the settings, copied first (never moved: a fresh start clears them only when Gatefold closes)
     phase_ = BackingUp;

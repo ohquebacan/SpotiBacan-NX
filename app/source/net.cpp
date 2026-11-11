@@ -256,7 +256,7 @@ bool post(const std::string& url, const std::string& json, char* secret, std::st
     fwrite(json.data(), 1, json.size(), f);
     fclose(f);
     (void)url;
-    out = "{\"number\": " + std::to_string(n) + ", \"html_url\": \"https://github.com/noesio582-boop/NXtify/issues/" + std::to_string(n) + "\"}";
+    out = "{\"number\": " + std::to_string(n) + ", \"html_url\": \"https://github.com/ohquebacan/SpotiBacan-NX/issues/" + std::to_string(n) + "\"}";
     SDL_Delay(400);   // a little of the wait a real request has
     return true;
 }
