@@ -82,7 +82,8 @@ bool App::init() {
     LOG("IMG_Init: 0x%x", imgFlags);
     startMark("init");
 #ifdef GF_WINDOWED
-    store.load();   // the window goes where it was left
+    store.load();
+    css::applyLayout(store.bigLayout);   // the window goes where it was left
     {
         // The console's shape, as big as the screen comfortably holds at this screen's own scale
         SDL_Rect room{ 0, 0, 1280, 720 };
@@ -148,6 +149,7 @@ bool App::init() {
     LOG("App::init: loading store...");
 #ifndef GF_WINDOWED
     store.load();
+    css::applyLayout(store.bigLayout);
 #endif
     // After a factory reset: its old settings folder, moved aside at exit, is deleted in the background
     if (struct stat st; stat((std::string(Store::Dir) + ".erased").c_str(), &st) == 0)
@@ -1090,8 +1092,12 @@ void App::update() {
 
     // Only a burst that actually arrived is analysed; between bursts the bars glide (spectrum.hpp).
     spec.params = { canvas ? store.canvasBars : store.vizBands, store.vizSensitivity, store.vizSmoothing };
-    if (isPlaying() && player.latestPcm(pcm_.data(), Spectrum::N)) spec.feed(pcm_.data(), player.sampleRate());
-    spec.step(dt, isPlaying());
+    // SpotiBacan: solo si se ve (Sonando o el Canvas). Antes corria en cada cuadro en cualquier pantalla y, con el
+    // servicio de fondo, la senal se inventaba sumando 28 senos x 4096 muestras + una FFT de 4096 en el hilo de la
+    // interfaz: era de lo que mas trababa la navegacion.
+    const bool specSeen = canvas || route.view == View::Now;
+    if (specSeen && isPlaying() && player.latestPcm(pcm_.data(), Spectrum::N)) spec.feed(pcm_.data(), player.sampleRate());
+    if (specSeen) spec.step(dt, isPlaying());
     // The cover's bass pulse (Now playing, and the Canvas when asked for), eased so a kick swells rather than pops.
     // (still while Automix joins: the user, 2026-10-28)
     const float wantBeat = store.coverPulse > 0 ? std::min(0.03f, spec.beat * 0.07f) * store.coverPulse * (1 - automixFocus().quiet) : 0;

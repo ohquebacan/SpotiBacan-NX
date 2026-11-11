@@ -454,7 +454,7 @@ void App::drawSettings(float x, float y, float w, float h) {
                           { segRow(tr("View", "Vista"), tr("Large: big buttons, side rail and info pills. Classic: the compact original",
                                                              "Grande: botones grandes, riel lateral y pastillas de informacion. Clasica: la original, mas compacta"),
                                    "set.layout", { tr("Large", "Grande"), tr("Classic", "Clasica") }, store.bigLayout ? 0 : 1,
-                                   [this](int i) { store.bigLayout = i == 0; g_bigLayout = store.bigLayout; persistSoon(0.3f); }),
+                                   [this](int i) { store.bigLayout = i == 0; g_bigLayout = store.bigLayout; css::applyLayout(store.bigLayout); persistSoon(0.3f); }),
                             segRow(tr("Language", "Idioma"), tr("Interface language", "Idioma de la interfaz"), "set.lang",
                                    { "English", "Español" }, store.lang, [this](int i) { store.lang = i; g_lang = i; persistSoon(0.3f); }),
                             toggleRow(tr("Collapse the sidebar", "Contraer la barra lateral"), tr("Icons only, more room for everything else", "Solo iconos, mas espacio para todo lo demas"), "set.side", store.sidebarCollapsed),

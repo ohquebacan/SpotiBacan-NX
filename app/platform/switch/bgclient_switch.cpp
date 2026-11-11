@@ -147,6 +147,7 @@ void BgClient::checkArtwork() {
 bool BgClient::poll(double) {
     if (g_ipcBusy.load()) return true;
     const double now = bgClock();
+    if (connected_ && now - polledAt_ < 0.1 && now >= polledAt_) return true;   // SpotiBacan: no en cada cuadro
     if (!connected_) {
         if (!connect()) return false;
     }
@@ -182,7 +183,8 @@ bool BgClient::poll(double) {
         st_.trackGen++;
         checkArtwork();
     } else if (artworkCachePath_.empty()) {
-        checkArtwork();
+        static double s_artAt = -10;
+        if (now - s_artAt > 2.0) { s_artAt = now; checkArtwork(); }
     }
 
     if (now < expectUntil_) {
@@ -309,7 +311,7 @@ bool BgClient::pcm(float* out, int n) {
     if (!connected_ || st_.status != BgState::Playing || !out || n <= 0) return false;
     const double now = bgClock();
     static double s_lastAt = 0.0;
-    if (now - s_lastAt < 0.014) return false;
+    if (now - s_lastAt < 0.05) return false;   // SpotiBacan: 20 por segundo bastan (las barras se deslizan entre medio)
     s_lastAt = now;
 
     const double pos = position(now);
@@ -360,14 +362,18 @@ bool BgClient::pcm(float* out, int n) {
     std::memset(out, 0, sizeof(float) * size_t(n));
     const double invSr = twoPi / 48000.0;
     for (int k = 0; k < kBands; ++k) {
-        double ph = s_phase[k];
+        // SpotiBacan: seno por rotacion (cos/sin una vez por banda, despues solo multiplicaciones), no std::sin por muestra
         const double step = freqs[k] * invSr;
         const float a = amps[k];
+        float c = float(std::cos(s_phase[k])), s = float(std::sin(s_phase[k]));
+        const float dc = float(std::cos(step)), ds = float(std::sin(step));
         for (int i = 0; i < n; ++i) {
-            out[i] += a * std::sin(float(ph));
-            ph += step;
+            out[i] += a * s;
+            const float nc = c * dc - s * ds;
+            s = s * dc + c * ds;
+            c = nc;
         }
-        s_phase[k] = std::fmod(ph, twoPi);
+        s_phase[k] = std::fmod(s_phase[k] + step * n, twoPi);
     }
     return true;
 }

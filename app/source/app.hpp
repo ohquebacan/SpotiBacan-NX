@@ -43,9 +43,15 @@ inline int W = 1280, H = 720;   // follows the window: the shorter way 1280×720
 #else
 constexpr int W = 1280, H = 720;
 #endif
-constexpr float TbH = 46, BarH = 92, SideW = 236, SideWCollapsed = 68, RailW = 88;
-// --fs-* scale, one pixel up from the desktop values for a handheld screen
-constexpr int Xs = 12, Sm = 13, Base = 15, Md = 16, Lg = 19, Xl = 25, Xxl = 34, Hero = 52;
+constexpr float TbH = 46, SideW = 236, SideWCollapsed = 68, RailW = 88;
+// --fs-* scale, one pixel up from the desktop values for a handheld screen. SpotiBacan: variables, para que la vista
+// Grande agrande de verdad las letras y la barra de reproduccion (applyLayout); la Clasica usa los valores de siempre.
+inline float BarH = 92;
+inline int Xs = 12, Sm = 13, Base = 15, Md = 16, Lg = 19, Xl = 25, Xxl = 34, Hero = 52;
+inline void applyLayout(bool big) {
+    if (big) { BarH = 104; Xs = 14; Sm = 15; Base = 18; Md = 19; Lg = 22; Xl = 28; Xxl = 38; Hero = 56; }
+    else     { BarH = 92;  Xs = 12; Sm = 13; Base = 15; Md = 16; Lg = 19; Xl = 25; Xxl = 34; Hero = 52; }
+}
 }  // namespace css
 
 struct TourStep;   // tour.cpp
