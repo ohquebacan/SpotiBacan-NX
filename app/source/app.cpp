@@ -2209,8 +2209,11 @@ void App::loadTrack(int trackIdx, bool paused, bool start, double fade, const au
         std::scoped_lock lock(coversMutex_);
         if (auto it = store.covers.find(t.path); it != store.covers.end()) r.myCover = it->second;
     }
-    if (r.myCover.empty() && !bg.artworkCachePath().empty()) r.myCover = bg.artworkCachePath();
-    if (r.myCover.empty() && !bg.artworkUrl().empty()) r.myCover = bg.artworkUrl();
+    // SpotiBacan: la caratula del servicio de fondo solo vale para lo que suena en el servicio. Un archivo de la SD trae la
+    // suya dentro (la lee el cargador); antes se le ponia la de la ultima cancion online y se quedaba esa.
+    const bool fromBg = t.path.rfind("spotify:", 0) == 0;
+    if (fromBg && r.myCover.empty() && !bg.artworkCachePath().empty()) r.myCover = bg.artworkCachePath();
+    if (fromBg && r.myCover.empty() && !bg.artworkUrl().empty()) r.myCover = bg.artworkUrl();
     r.opts = paletteOpts();
     loader.request(std::move(r));
 

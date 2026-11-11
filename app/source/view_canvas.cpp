@@ -425,7 +425,8 @@ void App::drawCanvas() {
     canvasCtl += ((idle || canvasViz > 0.12f ? 0.f : 1.f) - canvasCtl) * (1 - std::exp(-dt / 0.12f));
     const float padX = 4 * vw(), bottom = css::H - 3.2f * vh();
     // .cv-progress sits just above the transport, as on PC: closer to the buttons than to the text above
-    const float toolsCy = bottom - 21, transCy = toolsCy - 21 - 6 - 8 - 30, progCy = transCy - 30 - 14;
+    // SpotiBacan: una sola fila (reproduccion a la izquierda, herramientas a la derecha), botones mas grandes
+    const float toolsCy = bottom - 36, transCy = toolsCy, progCy = transCy - 36 - 26;
     const float ctlA = canvasCtl, slide = (1 - canvasCtl) * 14;
     const bool live = canvasCtl > 0.3f;
 
@@ -481,7 +482,7 @@ void App::drawCanvas() {
 
     // .cv-time + .cv-transport
     const Font timeF{ 13, Weight::SemiBold };
-    const float timeCy = transCy + slide;   // level with the buttons, ~43 px under the bar as on PC
+    const float timeCy = progCy - 16 + slide;   // SpotiBacan: sobre la barra de progreso, en sus dos puntas
     // in a Simple join the outgoing song's times (where it is, its length) until the swipe passes them: one swipe from the
     // left one to the right one, on the join's clock (the user, 2026-10-29: the next song's length showed at once)
     auto times = [&](bool old) {
@@ -505,10 +506,11 @@ void App::drawCanvas() {
         const float s = ui.pressed(id) ? 0.94f : 1.f;
         if (big) g.circle(cx, cy, size / 2 * s, pal.accent, ctlA);
         else g.circle(cx, cy, size / 2 * s, pal.text, (hot ? 0.16f : 0.08f) * ctlA);
-        g.icon(icon, cx, cy, big ? 26 : 18, big ? pal.onAccent : on && !disabled ? pal.accentInk : pal.text, ctlA * (disabled ? 0.35f : 1.f));
+        g.icon(icon, cx, cy, std::round(size * (big ? 0.40f : 0.42f)), big ? pal.onAccent : on && !disabled ? pal.accentInk : pal.text, ctlA * (disabled ? 0.35f : 1.f));
         return hit;
     };
     const float mid = css::W / 2.f, tc = transCy + slide;
+    const float tPrev = padX + 27, tPlay = tPrev + 27 + 14 + 36, tNext = tPlay + 36 + 14 + 27;   // SpotiBacan
     hint(uid("cv.prev"), tr("Previous", "Anterior"));
     hint(uid("cv.play"), isPlaying() ? tr("Pause", "Pausar") : tr("Play", "Reproducir"));
     hint(uid("cv.next"), tr("Next", "Siguiente"));
@@ -516,28 +518,28 @@ void App::drawCanvas() {
     hint(uid("cv.sleep"), tr("Sleep timer", "Temporizador"));
     hint(uid("cv.lyrics"), store.canvasLyrics ? tr("Hide the lyrics", "Ocultar letras") : tr("Show the lyrics", "Mostrar letras"));
     hint(uid("cv.close"), tr("Close the Canvas", "Cerrar el Lienzo"));
-    if (cvBtn(uid("cv.prev"), ICON_PREV, mid - 30 - 14 - 21, tc, 42, false)) prev();
-    if (cvBtn(uid("cv.play"), isPlaying() ? ICON_PAUSE : ICON_PLAY, mid, tc, 60, true)) togglePlay();
-    if (cvBtn(uid("cv.next"), ICON_NEXT, mid + 30 + 14 + 21, tc, 42, false)) next(false);
+    if (cvBtn(uid("cv.prev"), ICON_PREV, tPrev, tc, 54, false)) prev();
+    if (cvBtn(uid("cv.play"), isPlaying() ? ICON_PAUSE : ICON_PLAY, tPlay, tc, 72, true)) togglePlay();
+    if (cvBtn(uid("cv.next"), ICON_NEXT, tNext, tc, 54, false)) next(false);
 
     // .cv-tools: layout segment, volume, lyrics, close
     const Font segF{ 13, Weight::SemiBold };
     const char* layouts[] = { tr("Cover", "Portada"), tr("Lyrics", "Letras"), tr("Minimal", "Minimal") };
     float segW = 6;
     for (const char* l : layouts) segW += g.measure(l, segF) + 28;
-    const float volW = 42 + 4 + 120 + 12;   // mute, gap, range, padding (the thumb travels inside the range)
+    const float volW = 50 + 4 + 130 + 12;   // mute, gap, range, padding (the thumb travels inside the range)
     // The sleep timer's moon: a pill with the time left while it runs.
     const double sleepLeftNow = sleepLeft();
     const Font sleepF{ 13, Weight::SemiBold };
-    const float sleepW = sleepLeftNow > 0 ? 42 + g.measure("88:88", sleepF) + 4 : 42;
+    const float sleepW = sleepLeftNow > 0 ? 50 + g.measure("88:88", sleepF) + 4 : 50;
     // The lyrics' timing, while synced lyrics show (the Cover and Lyrics layouts, with the lyrics switch on)
     const bool syncShown = canvasLayoutShown() != 2 && store.canvasLyrics && lyricTimingShown();
     const Font syncF{ 13, Weight::SemiBold };
-    const float syncW = syncShown ? lyricSyncControl(nullptr, 0, 0, 42, syncF, 0, false) : 0;
-    const float totalW = segW + 8 + volW + 8 + sleepW + 8 + (syncShown ? syncW + 8 : 0) + 42 + 8 + 42;
-    float x = mid - totalW / 2;
+    const float syncW = syncShown ? lyricSyncControl(nullptr, 0, 0, 50, syncF, 0, false) : 0;
+    const float totalW = segW + 8 + volW + 8 + sleepW + 8 + (syncShown ? syncW + 8 : 0) + 50 + 8 + 50;
+    float x = css::W - padX - totalW;   // SpotiBacan: a la derecha, en la misma fila que la reproduccion
     const float cy = toolsCy + slide;
-    g.roundRect(x, cy - 19, segW, 38, 19, pal.text, 0.08f * ctlA);
+    g.roundRect(x, cy - 23, segW, 46, 23, pal.text, 0.08f * ctlA);
     float bx = x + 3;
     // While Minimal is forced (no lyrics), the layouts that cannot show are greyed and ignore presses,
     // and the one actually shown is the raised one.
@@ -546,25 +548,25 @@ void App::drawCanvas() {
         const float w = g.measure(layouts[i], segF) + 28;
         const Id id = uid("cv.layout", i);
         const bool disabled = off & (1u << i);
-        if (live && !disabled && ui.item(id, { bx, cy - 16, w, 32 }, 16)) { store.canvasLayout = i; persistSoon(0.3f); }
+        if (live && !disabled && ui.item(id, { bx, cy - 20, w, 40 }, 20)) { store.canvasLayout = i; persistSoon(0.3f); }
         const bool on = canvasLayoutShown() == i, hot = !disabled && ui.focused(id) && ui.showFocusRing();
-        if (on || hot) g.roundRect(bx, cy - 16, w, 32, 16, pal.text, (on ? 0.16f : 0.08f) * ctlA);
+        if (on || hot) g.roundRect(bx, cy - 20, w, 40, 20, pal.text, (on ? 0.16f : 0.08f) * ctlA);
         g.textC(layouts[i], segF, bx + w / 2, cy, on ? pal.text : pal.text2, ctlA * (disabled ? 0.35f : 1.f), Align::Center);
         bx += w;
     }
     x += segW + 8;
     // .cv-vol: mute button + range (track in --text, not the accent)
-    g.roundRect(x, cy - 21, volW, 42, 21, pal.text, 0.08f * ctlA);
+    g.roundRect(x, cy - 25, volW, 50, 25, pal.text, 0.08f * ctlA);
     {
         const Id mid2 = uid("cv.mute");
-        if (live && ui.item(mid2, { x, cy - 21, 42, 42 }, 21)) {
+        if (live && ui.item(mid2, { x, cy - 25, 50, 50 }, 25)) {
             static float before = 1;
             if (volumeShown > 0.001f) { before = volumeShown; volumeShown = 0; }
             else volumeShown = before > 0.01f ? before : 1;
             player.setVolume(volumeShown);
         }
-        g.icon(volumeShown <= 0.001f ? ICON_VOL_X : ICON_VOL, x + 21, cy, 18, pal.text, ctlA);
-        const float rx = x + 42 + 4, rw = 120;
+        g.icon(volumeShown <= 0.001f ? ICON_VOL_X : ICON_VOL, x + 25, cy, 21, pal.text, ctlA);
+        const float rx = x + 50 + 4, rw = 130;
         const Id rid = uid("cv.vol");
         float v = volumeShown;
         if (live) {
@@ -583,27 +585,27 @@ void App::drawCanvas() {
     x += volW + 8;
     {
         const Id sid = uid("cv.sleep");
-        if (live && ui.item(sid, { x, cy - 21, sleepW, 42 }, 21)) openSleep();
+        if (live && ui.item(sid, { x, cy - 25, sleepW, 50 }, 25)) openSleep();
         const bool hot = ui.pressed(sid) || (ui.focused(sid) && ui.showFocusRing());
-        g.roundRect(x, cy - 21, sleepW, 42, 21, pal.text, (hot ? 0.16f : 0.08f) * ctlA);
-        g.icon(ICON_MOON, x + 21, cy, 18, sleepLeftNow > 0 ? pal.accentInk : pal.text, ctlA);
-        if (sleepLeftNow > 0) g.textC(fmtTime(std::ceil(sleepLeftNow)), sleepF, x + 38, cy, pal.accentInk, ctlA);
+        g.roundRect(x, cy - 25, sleepW, 50, 25, pal.text, (hot ? 0.16f : 0.08f) * ctlA);
+        g.icon(ICON_MOON, x + 25, cy, 21, sleepLeftNow > 0 ? pal.accentInk : pal.text, ctlA);
+        if (sleepLeftNow > 0) g.textC(fmtTime(std::ceil(sleepLeftNow)), sleepF, x + 46, cy, pal.accentInk, ctlA);
     }
     x += sleepW + 8;
     if (syncShown) {
-        lyricSyncControl("cv.sync", x, cy, 42, syncF, ctlA, live);   // not pressable while the controls are hidden
+        lyricSyncControl("cv.sync", x, cy, 50, syncF, ctlA, live);   // not pressable while the controls are hidden
         x += syncW + 8;
     }
     // The lyrics switch, greyed while the track has none (nothing it could show or hide)
     const bool noLyrics = now.track >= 0 && !now.loading && now.lyrics.empty();
-    if (cvBtn(uid("cv.lyrics"), ICON_QUOTE, x + 21, cy, 42, false, store.canvasLyrics, noLyrics)) { store.canvasLyrics = !store.canvasLyrics; store.save(); }
-    x += 42 + 8;
-    if (cvBtn(uid("cv.close"), ICON_X, x + 21, cy, 42, false)) openCanvas(false);
+    if (cvBtn(uid("cv.lyrics"), ICON_QUOTE, x + 25, cy, 50, false, store.canvasLyrics, noLyrics)) { store.canvasLyrics = !store.canvasLyrics; store.save(); }
+    x += 50 + 8;
+    if (cvBtn(uid("cv.close"), ICON_X, x + 25, cy, 50, false)) openCanvas(false);
     if (live) {
         // The D-pad on the bottom row: Up goes to the nearest of previous, play and next (the seek line spans the width
         // and was nearer by the layout); previous and next keep Left/Right to themselves (they dropped to the row below)
         const Id trans[3] = { uid("cv.prev"), uid("cv.play"), uid("cv.next") };
-        const float tx[3] = { mid - 30 - 14 - 21, mid, mid + 30 + 14 + 21 };
+        const float tx[3] = { tPrev, tPlay, tNext };
         std::vector<Id> row = { uid("cv.layout", 0), uid("cv.layout", 1), uid("cv.layout", 2), uid("cv.mute"), uid("cv.vol"), uid("cv.sleep"),
                                 uid("cv.sync", 0), uid("cv.sync", 1), uid("cv.sync", 2), uid("cv.lyrics"), uid("cv.close") };
         for (Id id : row) {
