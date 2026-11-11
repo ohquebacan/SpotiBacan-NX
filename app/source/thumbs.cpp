@@ -238,9 +238,8 @@ void ThumbWorker::run() {
                 if (!valid) {
                     remove(localFile.c_str());
                     std::string err;
-                    LOG("Thumbs: downloading cover '%s' to '%s'", j.mine.c_str(), localFile.c_str());
                     bool ok = net::download(j.mine, localFile, err, nullptr);
-                    LOG("Thumbs: download cover result: %d (err='%s')", int(ok), err.c_str());
+                    if (!ok) LOG("Thumbs: cover failed (%s)", err.c_str());
                 }
             }
             bytes = readFile(localFile);

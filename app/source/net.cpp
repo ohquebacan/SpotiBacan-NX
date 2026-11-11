@@ -89,10 +89,20 @@ std::string explain(CURLcode rc, long status) {
     }
 }
 
+std::string hostOf(const std::string& url) {
+    const size_t a = url.find("://");
+    const size_t b = url.find('/', a == std::string::npos ? 0 : a + 3);
+    return url.substr(0, b);
+}
+
 bool run(const std::string& url, Sink& sink, std::string& err, const std::string* json = nullptr, const char* secret = nullptr) {
-    std::lock_guard<std::recursive_mutex> g(gate);
-    std::string e;
-    if (!beginLocked(e)) { err = e; return false; }
+    // SpotiBacan: el candado solo cubre el arranque de curl. Antes cubria toda la transferencia y cada caratula esperaba
+    // a que terminara cualquier otra descarga (cada handle de curl es independiente, no hace falta serializarlas).
+    {
+        std::lock_guard<std::recursive_mutex> g(gate);
+        std::string e;
+        if (!beginLocked(e)) { err = e; return false; }
+    }
     CURL* c = curl_easy_init();
     if (!c) { err = "The network library did not start"; return false; }
     curl_slist* headers = nullptr;
@@ -134,10 +144,9 @@ bool run(const std::string& url, Sink& sink, std::string& err, const std::string
     curl_slist_free_all(headers);
     if (rc != CURLE_OK) {
         err = explain(rc, status);
-        LOG("net::run: URL '%s' FAILED (rc=%d, status=%ld, err='%s')", url.c_str(), rc, status, err.c_str());
+        LOG("net::run: %s FAILED (rc=%d, status=%ld, err='%s')", hostOf(url).c_str(), rc, status, err.c_str());
         return false;
     }
-    LOG("net::run: URL '%s' SUCCESS (status=%ld)", url.c_str(), status);
     return true;
 }
 
@@ -174,7 +183,6 @@ bool post(const std::string& url, const std::string& json, char* secret, std::st
 }
 
 bool download(const std::string& url, const std::string& file, std::string& err, Progress* p) {
-    LOG("net::download: start url='%s' -> file='%s'", url.c_str(), file.c_str());
     const std::string tmp = file + ".part";
     FILE* f = fopen(tmp.c_str(), "wb");
     if (!f) {
@@ -195,7 +203,7 @@ bool download(const std::string& url, const std::string& file, std::string& err,
     }
     if (!ok) {
         remove(tmp.c_str());
-        LOG("net::download: failed downloading url='%s', err='%s'", url.c_str(), err.c_str());
+        LOG("net::download: failed (%s)", err.c_str());
         return false;
     }
     if (!finish(tmp, file)) {
@@ -203,7 +211,6 @@ bool download(const std::string& url, const std::string& file, std::string& err,
         LOG("net::download: finish rename failed: %s -> %s", tmp.c_str(), file.c_str());
         return false;
     }
-    LOG("net::download: successfully downloaded to %s", file.c_str());
     return true;
 }
 

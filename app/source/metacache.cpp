@@ -403,9 +403,8 @@ void MetaCache::run() {
                     remove(localFile.c_str());
                     std::string err;
                     net::begin(err);
-                    LOG("MetaCache: downloading cover '%s' to '%s'", mine.c_str(), localFile.c_str());
                     bool ok = net::download(mine, localFile, err, nullptr);
-                    LOG("MetaCache: download cover result: %d (err='%s')", int(ok), err.c_str());
+                    if (!ok) LOG("MetaCache: cover failed (%s)", err.c_str());
                 }
             }
             if (FILE* f = fopen(localFile.c_str(), "rb")) {
@@ -486,9 +485,8 @@ void MetaCache::cacheArtOnly(int idx, const std::string& jobPath, const std::str
                 remove(localFile.c_str());
                 std::string err;
                 net::begin(err);
-                LOG("MetaCache::cacheArtOnly: downloading cover '%s' to '%s'", mine.c_str(), localFile.c_str());
                 bool ok = net::download(mine, localFile, err, nullptr);
-                LOG("MetaCache::cacheArtOnly: download cover result: %d (err='%s')", int(ok), err.c_str());
+                if (!ok) LOG("MetaCache: cover failed (%s)", err.c_str());
             }
         }
         bytes = readAll(localFile);
