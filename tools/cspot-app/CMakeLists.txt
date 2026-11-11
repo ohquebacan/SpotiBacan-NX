@@ -1,0 +1,18 @@
+# SpotiBacan: compila cspot + bell para la app (.nro). El repo de NXtify enlaza
+# build_app/cspot/libcspot.a pero no trae el paso que la genera.
+cmake_minimum_required(VERSION 3.13)
+project(spotibacan_cspot C CXX)
+set(CMAKE_CXX_STANDARD 20)
+add_compile_options(-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE -O2 -ffunction-sections -fdata-sections -D__SWITCH__)
+set(CSPOT_USE_PREGEN_PROTO ON CACHE BOOL "" FORCE)
+set(BELL_DISABLE_SINKS ON CACHE BOOL "" FORCE)
+set(BELL_DISABLE_WEBSERVER ON CACHE BOOL "" FORCE)
+set(BELL_DISABLE_MQTT ON CACHE BOOL "" FORCE)
+set(BELL_DISABLE_REGEX ON CACHE BOOL "" FORCE)
+set(BELL_DISABLE_FMT ON CACHE BOOL "" FORCE)
+set(BELL_CODEC_VORBIS ON CACHE BOOL "" FORCE)
+set(BELL_CODEC_AAC OFF CACHE BOOL "" FORCE)
+set(BELL_CODEC_MP3 OFF CACHE BOOL "" FORCE)
+set(BELL_CODEC_ALAC OFF CACHE BOOL "" FORCE)
+set(BELL_CODEC_OPUS OFF CACHE BOOL "" FORCE)
+add_subdirectory(../../vendor/cspot ${CMAKE_BINARY_DIR}/cspot)
