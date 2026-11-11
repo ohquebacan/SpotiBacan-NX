@@ -6,6 +6,7 @@
  */
 #include <algorithm>
 #include <cmath>
+#include <vector>
 
 #include "app.hpp"
 #include "icons.inc"
@@ -457,7 +458,43 @@ void App::drawCanvas() {
             g.circle(padX + pw * frac, base, 6, pal.text, a);
         }
     }
-    if (vz > 0.001f && store.vizStyle == 1) {
+    if (vz > 0.001f && store.vizStyle == 2) {
+        // SpotiBacan: particulas. Chispas que suben desde abajo con los colores de la paleta; salen mas (y mas rapido)
+        // cuando la cancion pega fuerte (spec.beat) y segun lo lleno que este el espectro. La linea de abajo sigue siendo
+        // la barra de progreso.
+        struct Spark { float x, y, vy, vx, r, life; Rgb c; };
+        static std::vector<Spark> sparks;
+        static uint32_t rng = 0x7f4a7c15u;
+        auto rnd = [] { rng = rng * 1664525u + 1013904223u; return float(rng >> 8) / float(1u << 24); };
+        float energy = 0;
+        for (int i = 0; i < spec.bands; i++) energy += spec.bars[i];
+        energy /= std::max(1, spec.bands);
+        const Rgb cols[4] = { pal.accent2, pal.accent, pal.glow, pal.accentInk };
+        const float rise = 240;   // hasta donde llegan (px sobre la linea)
+        if (isPlaying()) {
+            static float owed = 0;
+            owed += dt * 60 * (0.6f + energy * 5.f + spec.beat * 22.f) * vz;
+            while (owed >= 1 && sparks.size() < 420) {
+                owed -= 1;
+                const float speed = 70 + rnd() * 90 + spec.beat * 260;
+                sparks.push_back({ padX + rnd() * pw, base - 2, -speed, (rnd() - 0.5f) * 22, 2.f + rnd() * 4.5f, 1.f, cols[int(rnd() * 3.99f)] });
+            }
+            if (owed > 1) owed = 1;
+        }
+        for (size_t i = 0; i < sparks.size();) {
+            Spark& p = sparks[i];
+            p.y += p.vy * dt;
+            p.x += p.vx * dt;
+            p.vy *= 1 - 0.35f * dt;   // se frenan un poco al subir
+            p.life -= dt / 2.4f;
+            if (p.life <= 0 || p.y < base - rise) { sparks[i] = sparks.back(); sparks.pop_back(); continue; }
+            const float h = clampf((base - p.y) / rise, 0, 1);
+            g.circle(p.x, p.y, p.r * (1 - 0.4f * h), p.c, vz * p.life * (1 - h * 0.7f));
+            ++i;
+        }
+        g.roundRect(padX, base - 1.5f, pw, 3, 1.5f, pal.text, 0.12f * vz);
+        g.roundRect(padX, base - 1.5f, pw * frac, 3, 1.5f, pal.accent, 0.8f * vz);
+    } else if (vz > 0.001f && store.vizStyle == 1) {
         // SpotiBacan: puntos LED. Cada columna es una banda; se encienden de abajo hacia arriba y cada fila toma su color de
         // una rampa de la paleta del disco (segundo acento -> acento -> brillo -> acento claro), asi la columna llena
         // recorre casi toda la paleta. Lo ya sonado brilla mas (sigue siendo la barra de progreso); el pico, en blanco.

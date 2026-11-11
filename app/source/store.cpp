@@ -156,7 +156,7 @@ void Store::load() {
         else if (k == "order") order = Order(std::clamp(atoi(v.c_str()), 0, 3));
         else if (k == "sidebarCollapsed") sidebarCollapsed = v == "1";
         else if (k == "bigLayout") bigLayout = v == "1";
-        else if (k == "vizStyle") vizStyle = std::clamp(atoi(v.c_str()), 0, 1);
+        else if (k == "vizStyle") vizStyle = std::clamp(atoi(v.c_str()), 0, 2);
         else if (k == "motion") motion = v == "1";
         else if (k == "mixAnimNow") mixAnimNow = std::clamp(atoi(v.c_str()), 0, 2);
         else if (k == "mixAnimCanvas") mixAnimCanvas = std::clamp(atoi(v.c_str()), 0, 1);
