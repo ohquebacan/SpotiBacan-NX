@@ -43,7 +43,7 @@ inline int W = 1280, H = 720;   // follows the window: the shorter way 1280×720
 #else
 constexpr int W = 1280, H = 720;
 #endif
-constexpr float TbH = 46, BarH = 92, SideW = 236, SideWCollapsed = 68;
+constexpr float TbH = 46, BarH = 92, SideW = 236, SideWCollapsed = 88;
 // --fs-* scale, one pixel up from the desktop values for a handheld screen
 constexpr int Xs = 12, Sm = 13, Base = 15, Md = 16, Lg = 19, Xl = 25, Xxl = 34, Hero = 52;
 }  // namespace css
@@ -1161,6 +1161,7 @@ private:
     void confirmLogoutSpotify();
     void logoutSpotify();
     void drawSpotifyLoginScreen();
+    void drawRail();   // SpotiBacan: barra lateral como riel de iconos grandes con su nombre
     mutable std::mutex coversMutex_;
     std::atomic<bool> spotifySyncQuit_{ false };
     bool supportAsked_ = false;

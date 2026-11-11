@@ -48,7 +48,7 @@ struct Store {
     std::vector<std::string> liked;   // track paths
     float volume = 0.5f;   // first-run defaults: the user's choices (2026-10-28, NEXT_SESSION #18)
     Order order = Order::RepeatAll;
-    bool sidebarCollapsed = false;
+    bool sidebarCollapsed = true;   // SpotiBacan: el riel de iconos grandes es lo normal
     bool motion = true;
     // Settings › Appearance › Automix (the user, 2026-10-29): how a join shows. Now playing: 0 Full (the interface steps
     // aside, the cover glides to the screen's middle), 1 Immersive (the cover to the page's middle, the bars stay), 2 Simple

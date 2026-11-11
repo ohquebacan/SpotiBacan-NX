@@ -154,7 +154,7 @@ void Store::load() {
         const std::string k = l.substr(0, eq), v = l.substr(eq + 1);
         if (k == "volume") volume = std::clamp(float(atof(v.c_str())), 0.f, 1.f);
         else if (k == "order") order = Order(std::clamp(atoi(v.c_str()), 0, 3));
-        else if (k == "sidebarCollapsed") sidebarCollapsed = v == "1";
+        else if (k == "sidebarRail") sidebarCollapsed = v == "1";
         else if (k == "motion") motion = v == "1";
         else if (k == "mixAnimNow") mixAnimNow = std::clamp(atoi(v.c_str()), 0, 2);
         else if (k == "mixAnimCanvas") mixAnimCanvas = std::clamp(atoi(v.c_str()), 0, 1);
@@ -399,7 +399,7 @@ void Store::saveCovers() const {
 void Store::save() const {
     makeDirs();
     std::string f;
-    appendf(f, "volume=%.3f\norder=%d\nsidebarCollapsed=%d\nmotion=%d\nspectrum=%d\ncanvasLayout=%d\ncanvasLyrics=%d\n", volume, int(order),
+    appendf(f, "volume=%.3f\norder=%d\nsidebarRail=%d\nmotion=%d\nspectrum=%d\ncanvasLayout=%d\ncanvasLyrics=%d\n", volume, int(order),
             sidebarCollapsed, motion, showSpectrum, canvasLayout, canvasLyrics);
     appendf(f, "vizSensitivity=%.3f\nvizSmoothing=%.3f\nvizBands=%d\nvizPeaks=%d\ncoverPulse=%.3f\n", vizSensitivity, vizSmoothing, vizBands,
             vizPeaks, coverPulse);

@@ -15,7 +15,7 @@
 #include "icons.inc"
 
 namespace {
-constexpr float RowH = 40;   // .vrow is 36 px on the PC; a little taller for fingers
+constexpr float RowH = 48;   // SpotiBacan: 48 (antes 40), mas comodo para el dedo
 }
 
 void App::drawTrackList(float x, float y, float w, float h) {

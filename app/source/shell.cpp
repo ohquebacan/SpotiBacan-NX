@@ -7,9 +7,12 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <sys/stat.h>
+#include <sys/statvfs.h>
 
 #include "app.hpp"
 #include "spotify_api.hpp"
+#include "downloader.hpp"
 #include "icons.inc"
 #include "plicons.inc"
 
@@ -439,6 +442,7 @@ void App::drawTitlebar() {
 void App::drawSidebar() {
     const float x0 = 10, w = sideW - 20;
     const bool collapsed = sideW < 120;
+    if (collapsed && sideOpen() < 0.02f) { drawRail(); return; }
     // how far open (App::sideOpen): the labels come in over its second half, settling 8 px towards the icons
     const float open = sideOpen(), lab = std::clamp((open - 0.4f) / 0.6f, 0.f, 1.f), labA = lab * lab * (3 - 2 * lab);
     float y = css::TbH + 6;
@@ -806,27 +810,73 @@ void App::drawPlayerbar() {
     drawSeek(sx + 58, seekY - 15, seekW - 116, 30, uid("pb.seek"));
     wipeGroup_.on = false;
 
-    // .pb-right: queue, volume, canvas
-    float x = rx + leftW;
-    if (iconButton(uid("pb.canvas"), ICON_CANVAS, x - 17, cy)) openCanvas(true);
-    x -= 34 + 14;   // Gatefold has the mini-player button here; keep the slider clear of the Canvas button
-    float vol = volumeShown;
-    slider(uid("pb.vol"), x - 110, cy, 110, volumeShown, &vol);
-    if (vol != volumeShown) { volumeShown = vol; player.setVolume(vol); }
-    x -= 110 + 4 + 7;
-    static float beforeMute = 1;
-    if (iconButton(uid("pb.mute"), volumeShown <= 0.001f ? ICON_VOL_X : ICON_VOL, x - 17, cy)) {
-        if (volumeShown > 0.001f) { beforeMute = volumeShown; volumeShown = 0; }
-        else volumeShown = beforeMute > 0.01f ? beforeMute : 1;
-        player.setVolume(volumeShown);
+    // SpotiBacan: .pb-right en pastillas de informacion (lo que sigue, la descarga, el temporizador, el espacio en la SD)
+    // en lugar de iconos chicos. Cada una se toca: la que sigue abre la cola; la descarga y la SD, Descargas; la luna,
+    // el temporizador. Se ponen de derecha a izquierda y la que no cabe no se muestra.
+    {
+        const float pillH = 40, left = rx - 4;
+        float x = rx + leftW;
+        const Font pf{ css::Sm, Weight::SemiBold };
+        auto pill = [&](const char* key, const char* icon, const std::string& text, bool lit) -> bool {
+            const float tw = text.empty() ? 0.f : float(g.measure(text, pf));
+            const float w = 14 + 18 + (text.empty() ? 0 : 8 + tw) + 14;
+            if (x - w < left) return false;
+            x -= w;
+            const Id id = uid(key);
+            const bool hit = ui.item(id, { x, cy - pillH / 2, w, pillH }, pillH / 2);
+            const bool hot = ui.pressed(id) || (ui.focused(id) && ui.showFocusRing());
+            g.roundRect(x, cy - pillH / 2, w, pillH, pillH / 2, lit ? pal.accent : pal.text, lit ? 0.18f : hot ? 0.14f : 0.08f);
+            g.icon(icon, x + 14 + 9, cy, 17, pal.accentInk);
+            if (!text.empty()) g.textC(text, pf, x + 14 + 18 + 8, cy, pal.text, 1.f, Align::Left);
+            x -= 8;
+            return hit;
+        };
+        auto openDownloads = [this] {
+            mkdir("sdmc:/music", 0777);
+            mkdir("sdmc:/music/SpotiBacan", 0777);
+            navigate(View::Files, -1, "sdmc:/music/SpotiBacan");
+        };
+        if (pill("pb.canvas", ICON_CANVAS, "", false)) openCanvas(true);   // (tambien con -)
+        // el temporizador
+        const double sl = sleepLeft();
+        if (pill("pb.sleep", ICON_MOON, sl > 0 ? fmtTime(std::ceil(sl)) : stopAfterCurrent ? std::string(tr("End of track", "Al terminar")) : std::string(),
+                 sl > 0 || stopAfterCurrent)) openSleep();
+        // el espacio libre en la SD (se mide cada 15 s)
+        {
+            static double at = -100;
+            static std::string freeTxt;
+            if (time - at > 15) {
+                at = time;
+                struct statvfs st{};
+                if (statvfs("sdmc:/", &st) == 0) {
+                    const double gb = double(st.f_bavail) * double(st.f_frsize) / (1024.0 * 1024.0 * 1024.0);
+                    char b[48];
+                    snprintf(b, sizeof b, tr("SD: %.1f GB free", "SD: %.1f GB libres"), gb);
+                    freeTxt = b;
+                }
+            }
+            if (!freeTxt.empty() && pill("pb.sd", ICON_FOLDER, freeTxt, false)) openDownloads();
+        }
+        // la descarga en curso
+        {
+            const Downloader::Status ds = Downloader::instance().status();
+            if (ds.active) {
+                char b[64];
+                snprintf(b, sizeof b, tr("Downloading · %d left · %d%%", "Descargando · faltan %d · %d%%"), ds.pending + 1, int(ds.progress * 100));
+                if (pill("pb.dl", ICON_DOWNLOAD, b, true)) openDownloads();
+            }
+        }
+        // lo que sigue
+        if (q.pos >= 0 && q.pos + 1 < int(q.order.size())) {
+            const int qi = q.order[size_t(q.pos + 1)];
+            const int ti = qi >= 0 && qi < int(q.tracks.size()) ? q.tracks[size_t(qi)] : -1;
+            if (ti >= 0 && ti < int(lib.tracks.size())) {
+                std::string t = lib.tracks[size_t(ti)].title;
+                if (t.size() > 26) { t.resize(24); while (!t.empty() && ((unsigned char)t.back() & 0xC0) == 0x80) t.pop_back(); if (!t.empty() && ((unsigned char)t.back() & 0x80)) t.pop_back(); t += "…"; }
+                if (pill("pb.queue", ICON_QUEUE, std::string(tr("Next: ", "Sigue: ")) + t, route.view == View::Queue)) navigate(View::Queue);
+            }
+        } else if (pill("pb.queue", ICON_QUEUE, "", route.view == View::Queue)) navigate(View::Queue);
     }
-    x -= 34 + 8;
-    if (iconButton(uid("pb.queue"), ICON_QUEUE, x - 17, cy, route.view == View::Queue)) navigate(View::Queue);
-    // The sleep timer: lit while it runs (or stop-after is on, its "End of this track"), the time left beside it.
-    x -= 34 + 8;
-    const double sl = sleepLeft();
-    if (iconButton(uid("pb.sleep"), ICON_MOON, x - 17, cy, sl > 0 || stopAfterCurrent)) openSleep();
-    if (sl > 0) g.textC(fmtTime(std::ceil(sl)), { css::Xs, Weight::SemiBold }, x - 34 - 4, cy, pal.accentInk, 1, Align::Right);
 }
 
 // ------------------------------------------------------------------ overlays
@@ -1073,4 +1123,37 @@ void App::drawFocusRing() {
     // :focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px }
     const float rad = ui.radiusOf(id) + 3;
     g.roundStroke(r.x - 4, r.y - 4, r.w + 8, r.h + 8, rad, 2, pal.accentInk);
+}
+
+// SpotiBacan: el riel. Cada seccion es un boton de 60 px de alto con el icono grande y su nombre debajo, comodo para el
+// dedo; las listas tienen su propia pagina (Listas) en vez de ir todas aqui, y Descargas abre lo guardado en la SD.
+void App::drawRail() {
+    const float x0 = 8, w = sideW - 16, h = 62;
+    float y = css::TbH + 8;
+    const View v = route.view;
+    auto item = [&](const char* key, const char* icon, const char* label, bool active) {
+        const Id id = uid(key);
+        const bool hit = ui.item(id, { x0, y, w, h }, 14);
+        const bool hot = ui.pressed(id) || (ui.focused(id) && ui.showFocusRing());
+        if (active) g.roundRect(x0, y, w, h, 14, pal.text, 0.10f);
+        else if (hot) g.roundRect(x0, y, w, h, 14, pal.text, ui.pressed(id) ? 0.11f : 0.065f);
+        const Rgb fg = active ? pal.accentInk : hot ? pal.text : pal.text2;
+        g.icon(icon, x0 + w / 2, y + 22, 24, fg);
+        g.textC(label, { css::Xs, Weight::SemiBold }, x0 + w / 2, y + 47, fg, 1.f, Align::Center, int(w - 4));
+        y += h + 4;
+        return hit;
+    };
+    if (item("rail.home", ICON_HOME, tr("Home", "Inicio"), v == View::Home)) navigate(View::Home);
+    if (item("rail.now", ICON_DISC, tr("Playing", "Sonando"), v == View::Now)) navigate(View::Now);
+    if (item("rail.lists", ICON_LIST, tr("Playlists", "Listas"), v == View::Playlists || v == View::List)) navigate(View::Playlists);
+    if (item("rail.albums", ICON_V_GRID, tr("Albums", "Albumes"), v == View::Albums || v == View::Album)) { libFrom = View::Albums; navigate(View::Albums); }
+    if (item("rail.artists", ICON_MIC, tr("Artists", "Artistas"), v == View::Artists || v == View::Artist)) navigate(View::Artists);
+    const std::string dl = "sdmc:/music/SpotiBacan";
+    if (item("rail.dl", ICON_DOWNLOAD, tr("Downloads", "Descargas"), v == View::Files && route.query.rfind(dl, 0) == 0)) {
+        mkdir("sdmc:/music", 0777);
+        mkdir(dl.c_str(), 0777);
+        navigate(View::Files, -1, dl);
+    }
+    y = css::H - css::BarH - 12 - h;
+    if (item("rail.settings", ICON_GEAR, tr("Settings", "Ajustes"), v == View::Settings)) navigate(View::Settings);
 }

@@ -17,7 +17,7 @@
 
 namespace {
 
-constexpr float RowH = 40;        // .vrow, a little taller than the PC's 36 for fingers
+constexpr float RowH = 48;        // SpotiBacan: 48 (antes 40), mas comodo para el dedo
 constexpr float CovRowH = 60;     // .vrow.wc: --rowc 56, + 4
 constexpr float GroupH = 76;      // .vhead: --head 72, + 4
 constexpr float ColHeadH = 38;    // .list-head 30 + 8 below
