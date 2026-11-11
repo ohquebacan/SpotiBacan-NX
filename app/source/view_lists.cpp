@@ -401,7 +401,7 @@ void App::drawPicker(float x, float y, float w, float h) {
         // Backups inside Gatefold's own settings folder would be copied into themselves, and cleared by a fresh start
         const std::string cfg = Store::Dir;
         if (clicked && folderFor == 4 && strncasecmp(path.c_str(), cfg.c_str(), cfg.size()) == 0 && (path.size() == cfg.size() || path[cfg.size()] == '/')) {
-            toast("Backups cannot go in NXtify's own settings folder");
+            toast("Backups cannot go in SpotiBacán's own settings folder");
             clicked = false;
         }
         if (clicked) {

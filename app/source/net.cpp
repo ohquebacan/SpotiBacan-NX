@@ -114,7 +114,7 @@ bool run(const std::string& url, Sink& sink, std::string& err, const std::string
     if (secret) headers = curl_slist_append(headers, secret);
     curl_easy_setopt(c, CURLOPT_URL, url.c_str());
     static const std::string agent = [] {   // "Songate/2.0.0-BETA": a product token has no spaces
-        std::string s = "NXtify/" GF_VERSION;
+        std::string s = "SpotiBacan/" GF_VERSION;
         for (char& ch : s) if (ch == ' ') ch = '-';
         return s;
     }();

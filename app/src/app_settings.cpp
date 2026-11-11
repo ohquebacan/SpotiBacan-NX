@@ -15,7 +15,7 @@
 namespace swsettings {
 namespace {
 #ifdef __SWITCH__
-constexpr const char* kSettingsFile = "/config/NXtify/settings.json";
+constexpr const char* kSettingsFile = "/config/SpotiBacan/settings.json";
 #else
 constexpr const char* kSettingsFile = "settings.json";
 #endif
@@ -39,7 +39,7 @@ void save() {
   std::lock_guard<std::mutex> lock(gSaveMutex);
 #ifdef __SWITCH__
   mkdir("/config", 0755);
-  mkdir("/config/NXtify", 0755);
+  mkdir("/config/SpotiBacan", 0755);
 #endif
   const auto snapshot = get();
   nlohmann::json json = {

@@ -54,9 +54,9 @@ void logInit() {
     std::lock_guard<std::mutex> lk(s_logMutex);
 #ifdef __SWITCH__
     mkdir("sdmc:/config", 0777);
-    mkdir("sdmc:/config/NXtify", 0777);
-    const char* logPath = "sdmc:/config/NXtify/app.log";
-    const char* prevPath = "sdmc:/config/NXtify/app.log.previous";
+    mkdir("sdmc:/config/SpotiBacan", 0777);
+    const char* logPath = "sdmc:/config/SpotiBacan/app.log";
+    const char* prevPath = "sdmc:/config/SpotiBacan/app.log.previous";
 #else
     const char* logPath = "app.log";
     const char* prevPath = "app.log.previous";

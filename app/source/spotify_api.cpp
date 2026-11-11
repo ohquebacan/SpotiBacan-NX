@@ -28,7 +28,7 @@ namespace {
 
 const std::string& webClientId() {
     static const std::string id = []() {
-        FILE* f = fopen("sdmc:/config/NXtify/client_id.txt", "rb");
+        FILE* f = fopen("sdmc:/config/SpotiBacan/client_id.txt", "rb");
         if (f) {
             char buf[64] = {};
             size_t n = fread(buf, 1, sizeof(buf) - 1, f);
@@ -48,7 +48,7 @@ const std::string& webClientId() {
 }
 #define WEB_CLIENT_ID (webClientId().c_str())
 const char* DEVICE_ID = "switch-nxtify-01";
-const char* USER_AGENT = "Spotify/127700358 Linux/0 (NXtify)";
+const char* USER_AGENT = "Spotify/127700358 Linux/0 (SpotiBacan)";
 
 // Spotify Pathfinder Query Hashes
 const char* HASH_FETCH_LIBRARY_TRACKS = "087278b20b743578a6262c2b0b4bcd20d879c503cc359a2285baf083ef944240";
@@ -256,8 +256,8 @@ bool SpotifyApi::init() {
 bool SpotifyApi::hasCredentials() const {
     if (credentialsLoaded_ && !authData_.empty()) return true;
     static const char* paths[] = {
-        "sdmc:/config/NXtify/credentials.json",
-        "/config/NXtify/credentials.json",
+        "sdmc:/config/SpotiBacan/credentials.json",
+        "/config/SpotiBacan/credentials.json",
         "sdmc:/config/Switify/credentials.json",
         "/config/Switify/credentials.json",
         nullptr
@@ -285,17 +285,17 @@ void SpotifyApi::logout() {
         tokenExpiryTime_ = 0;
         credentialsLoaded_ = false;
     }
-    remove("sdmc:/config/NXtify/credentials.json");
-    remove("/config/NXtify/credentials.json");
-    remove("sdmc:/config/NXtify/playback-session.json");
-    remove("sdmc:/config/NXtify/playback-session.json.tmp");
-    remove("sdmc:/config/NXtify/current-artwork-url");
-    remove("sdmc:/config/NXtify/spotify-tracks.tsv");
-    remove("sdmc:/config/NXtify/playlists.txt");
-    remove("sdmc:/config/NXtify/lists.txt");
-    remove("sdmc:/config/NXtify/liked.txt");
-    if (FILE* m = fopen("sdmc:/config/NXtify/do-not-import-poc-credentials", "wb")) {
-        fputs("NXtify sign-out marker\n", m);
+    remove("sdmc:/config/SpotiBacan/credentials.json");
+    remove("/config/SpotiBacan/credentials.json");
+    remove("sdmc:/config/SpotiBacan/playback-session.json");
+    remove("sdmc:/config/SpotiBacan/playback-session.json.tmp");
+    remove("sdmc:/config/SpotiBacan/current-artwork-url");
+    remove("sdmc:/config/SpotiBacan/spotify-tracks.tsv");
+    remove("sdmc:/config/SpotiBacan/playlists.txt");
+    remove("sdmc:/config/SpotiBacan/lists.txt");
+    remove("sdmc:/config/SpotiBacan/liked.txt");
+    if (FILE* m = fopen("sdmc:/config/SpotiBacan/do-not-import-poc-credentials", "wb")) {
+        fputs("SpotiBacán sign-out marker\n", m);
         fclose(m);
     }
     LOG("SpotifyApi::logout: credentials removed and state cleared.");
@@ -502,12 +502,12 @@ void SpotifyApi::pairingLoop() {
             if (!ctx->config.authData.empty()) {
                 std::string credJson = ctx->getCredentialsJson();
                 mkdir("sdmc:/config", 0777);
-                mkdir("sdmc:/config/NXtify", 0777);
-                if (FILE* f = fopen("sdmc:/config/NXtify/credentials.json", "wb")) {
+                mkdir("sdmc:/config/SpotiBacan", 0777);
+                if (FILE* f = fopen("sdmc:/config/SpotiBacan/credentials.json", "wb")) {
                     fwrite(credJson.data(), 1, credJson.size(), f);
                     fclose(f);
                 }
-                remove("sdmc:/config/NXtify/do-not-import-poc-credentials");
+                remove("sdmc:/config/SpotiBacan/do-not-import-poc-credentials");
                 {
                     std::scoped_lock lock(mutex_);
                     credentialsLoaded_ = loadCredentials();
@@ -532,9 +532,9 @@ void SpotifyApi::pairingLoop() {
 
 bool SpotifyApi::loadCredentials() {
     static const char* candidates[] = {
-        "sdmc:/config/NXtify/credentials.json",
+        "sdmc:/config/SpotiBacan/credentials.json",
         "sdmc:/config/Switify/credentials.json",
-        "config/NXtify/credentials.json",
+        "config/SpotiBacan/credentials.json",
         nullptr
     };
 
@@ -1312,8 +1312,8 @@ void SpotifyApi::codeLoop() {
         }
         const std::string credJson = ctx->getCredentialsJson();
         mkdir("sdmc:/config", 0777);
-        mkdir("sdmc:/config/NXtify", 0777);
-        const char* path = "sdmc:/config/NXtify/credentials.json";
+        mkdir("sdmc:/config/SpotiBacan", 0777);
+        const char* path = "sdmc:/config/SpotiBacan/credentials.json";
         const std::string tmp = std::string(path) + ".tmp";
         bool written = false;
         if (FILE* f = fopen(tmp.c_str(), "wb")) {
@@ -1322,7 +1322,7 @@ void SpotifyApi::codeLoop() {
         }
         if (written) { remove(path); written = rename(tmp.c_str(), path) == 0; }
         if (!written) { fail(5, "No se pudo guardar la sesion en la SD."); return; }
-        remove("sdmc:/config/NXtify/do-not-import-poc-credentials");
+        remove("sdmc:/config/SpotiBacan/do-not-import-poc-credentials");
         {
             std::scoped_lock lock(mutex_);
             credentialsLoaded_ = loadCredentials();

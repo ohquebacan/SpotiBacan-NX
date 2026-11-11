@@ -16,12 +16,12 @@ constexpr auto PollInterval = std::chrono::milliseconds(50);
 constexpr auto SnapshotInterval = std::chrono::milliseconds(250);
 constexpr auto ReconnectInterval = std::chrono::seconds(5);
 constexpr auto ResourceLogInterval = std::chrono::seconds(30);
-constexpr const char* CredentialsFile = "/config/NXtify/credentials.json";
-constexpr const char* CredentialsFileLegacy = "/config/NXtify/credentials.json";
+constexpr const char* CredentialsFile = "/config/SpotiBacan/credentials.json";
+constexpr const char* CredentialsFileLegacy = "/config/SpotiBacan/credentials.json";
 constexpr const char* ArtworkUrlFile =
-    "/config/NXtify/current-artwork-url";
+    "/config/SpotiBacan/current-artwork-url";
 constexpr const char* ArtworkUrlTemporary =
-    "/config/NXtify/current-artwork-url.tmp";
+    "/config/SpotiBacan/current-artwork-url.tmp";
 constexpr size_t MaxBrowseItems = 32;
 constexpr size_t BrowsePageSize = 25;
 constexpr size_t RemoteTrackPageSize = 50;
@@ -99,7 +99,7 @@ bool BackgroundBackend::start() {
   engine.setInteractiveAuthentication(false);
   engine.start();
   worker = std::thread([this] { run(); });
-  nxlog::push("Background NXtify backend started");
+  nxlog::push("Background SpotiBacán backend started");
   return true;
 }
 
@@ -108,7 +108,7 @@ void BackgroundBackend::stop() {
   core.configureCommands(false, SwitifyIpcCapability_Status, monotonicMs());
   if (worker.joinable()) worker.join();
   engine.shutdown();
-  nxlog::push("Background NXtify backend stopped");
+  nxlog::push("Background SpotiBacán backend stopped");
 }
 
 void BackgroundBackend::process(const ControlMessage& message) {
@@ -363,14 +363,14 @@ void BackgroundBackend::failBrowse(uint64_t generation,
     if (!running.load() || generation != activeBrowseGeneration) return;
   }
   core.publishBrowseError(generation,
-                          message.empty() ? "Contenido de NXtify no disponible"
+                          message.empty() ? "Contenido de SpotiBacán no disponible"
                                           : message,
                           monotonicMs());
 }
 
 void BackgroundBackend::requestHome() {
   const uint64_t generation =
-      beginRoot("Inicio", "Tu NXtify, organizado para Switch");
+      beginRoot("Inicio", "Tu SpotiBacán, organizado para Switch");
   engine.fetchDashboard(
       [this, generation](NXtifyEngine::Result<NXtifyEngine::HomeData> result) {
         if (!result.ok()) {
@@ -443,7 +443,7 @@ BackgroundBackend::BrowsePage BackgroundBackend::buildHomeRoot(
   BrowsePage page;
   page.title = "Inicio";
   page.subtitle = data.profile.displayName.empty()
-                      ? "Tu NXtify"
+                      ? "Tu SpotiBacán"
                       : "Bienvenido, " + data.profile.displayName;
   const auto section = [&page](BrowseSection id, size_t index,
                                const std::string& name,
@@ -473,7 +473,7 @@ BackgroundBackend::BrowsePage BackgroundBackend::buildLibraryRoot(
     const NXtifyEngine::LibraryData& data) const {
   BrowsePage page;
   page.title = "Tu biblioteca";
-  page.subtitle = "Tu coleccion guardada de NXtify";
+  page.subtitle = "Tu coleccion guardada de SpotiBacán";
   const auto add = [&page](BrowseSection id, const char* name, size_t count,
                            const char* singular, const char* plural) {
     if (count == 0) return;
@@ -914,7 +914,7 @@ void BackgroundBackend::run() {
       }
       if (engine.state() == NXtifyEngine::State::Error &&
           now >= nextReconnect) {
-        nxlog::push("Background NXtify reconnect requested");
+        nxlog::push("Background SpotiBacán reconnect requested");
         engine.retryConnection();
         nextReconnect = now + ReconnectInterval;
       } else if (engine.state() != NXtifyEngine::State::Error) {
@@ -927,7 +927,7 @@ void BackgroundBackend::run() {
         generation = activeBrowseGeneration;
       }
       nxlog::push("Background request ran out of memory; service retained");
-      failBrowse(generation, "NXtify content exceeded available memory");
+      failBrowse(generation, "SpotiBacán content exceeded available memory");
       core.publishResult(SwitifyControlResult_BackendUnavailable,
                          monotonicMs());
     } catch (const std::exception& error) {

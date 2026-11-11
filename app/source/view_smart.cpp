@@ -686,7 +686,7 @@ void App::drawSmartSheet() {
                              closeSheet();
                              newPlaylist(-1);
                          } });
-        rows.push_back({ Row::Action, ICON_SPARKLE, tr("Automix playlist…", "Playlist Automix…"), tr("Pick songs; NXtify orders them for the best joins", "Elige canciones; NXtify las ordena para las mejores uniones"), "",
+        rows.push_back({ Row::Action, ICON_SPARKLE, tr("Automix playlist…", "Playlist Automix…"), tr("Pick songs; SpotiBacán orders them for the best joins", "Elige canciones; SpotiBacán las ordena para las mejores uniones"), "",
                          [this] { openAutomixPicker(); } });
         rows.push_back({ Row::Action, PLI_SMART, tr("Smart playlist…", "Playlist inteligente…"), tr("Fills itself from your library and keeps up to date", "Se llena sola de tu biblioteca y se mantiene al dia"), "", [this] {
                              sheet.page = Sheet::Smart;
@@ -860,7 +860,7 @@ void App::drawSmartSheet() {
             rows.back().h = 44;
             rows.back().on = store.eq.preset < 0;
         }
-        if (rows.size()) { rows.push_back({ Row::Group, nullptr, "NXtify" }); rows.back().h = 34; }
+        if (rows.size()) { rows.push_back({ Row::Group, nullptr, "SpotiBacán" }); rows.back().h = 34; }
         for (int i = 0; i < GFEQ_PRESETS; i++) {
             rows.push_back({ Row::Choice, nullptr, kGfEqPresets[i].name, "", "", [this, i] {
                                  GfbgEq e = store.eq;
@@ -1007,7 +1007,7 @@ void App::drawSmartSheet() {
                             : jobs ? tr("Running now", "Ejecutandose ahora")
                             : page == Sheet::Smart ? tr("Smart playlist", "Playlist inteligente") : tr("New playlist", "Nueva playlist");
     const std::string sub = ownHead ? fileSub : page == Sheet::PlIcon ? tr("Its icon in the sidebar: A picks one", "Su icono en la barra lateral: A elige uno") : plp ? tr("More for this playlist", "Mas para esta playlist") : ask ? sheet.askSub
-                          : eqp ? tr("Yours keep the whole sound; NXtify's set the ten bands only", "Los tuyos guardan todo el sonido; los de NXtify ajustan las diez bandas")
+                          : eqp ? tr("Yours keep the whole sound; SpotiBacán's set the ten bands only", "Los tuyos guardan todo el sonido; los de SpotiBacán ajustan las diez bandas")
                           : actl ? tr("The playlist it plays, faded in", "La playlist que reproduce con fundido")
                           : lacts ? tr("The game events that play it; off, they do what they usually do", "Los eventos de juego que la reproducen; apagado usa su accion normal")
                           : rc ? rc->desc

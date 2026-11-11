@@ -13,12 +13,12 @@ TARGET      := nxtify-overlay
 BUILD       := build
 SOURCES     := source ../ipc-client/source
 INCLUDES    := ../ipc-client/include ../common/include
-APP_TITLE   := NXtify
-APP_AUTHOR  := noesio582-boop
+APP_TITLE   := SpotiBacán
+APP_AUTHOR  := OH! QUÉ BACÁN (base: NXtify)
 APP_VERSION := 0.5.0
 NO_ICON     := 1
 ifeq ($(LIGHTWEIGHT),1)
-APP_TITLE   := NXtify Lite
+APP_TITLE   := SpotiBacán Lite
 APP_VERSION := 0.5.0-lite1
 DEFINES     += -DSWITIFY_LIGHTWEIGHT_OVERLAY=1
 endif

@@ -29,15 +29,15 @@ constexpr const char* OverlayVersion = "v0.5.0";
 
 constexpr uint64_t SwitifyProgramId = UINT64_C(0x4200000000535754);
 constexpr const char* ReadyPath =
-    "sdmc:/config/NXtify/background-ready.log";
+    "sdmc:/config/SpotiBacan/background-ready.log";
 constexpr const char* ReadyPathLegacy =
-    "sdmc:/config/NXtify/background-ready.log";
+    "sdmc:/config/SpotiBacan/background-ready.log";
 constexpr const char* ArtworkUrlPath =
-    "sdmc:/config/NXtify/current-artwork-url";
+    "sdmc:/config/SpotiBacan/current-artwork-url";
 constexpr const char* ArtworkUrlPathLegacy =
-    "sdmc:/config/NXtify/current-artwork-url";
+    "sdmc:/config/SpotiBacan/current-artwork-url";
 constexpr const char* OverlayLogPath =
-    "sdmc:/config/NXtify/overlay.log";
+    "sdmc:/config/SpotiBacan/overlay.log";
 constexpr auto RefreshInterval = std::chrono::milliseconds(500);
 constexpr auto BrowseRefreshInterval = std::chrono::milliseconds(200);
 constexpr auto InputClaimInterval = std::chrono::milliseconds(200);
@@ -59,7 +59,7 @@ uint64_t capabilities = 0;
 uint64_t runningPid = 0;
 uint64_t connectedPid = 0;
 std::string serviceText = "Inactivo";
-std::string feedbackText = "Se inicia automaticamente con NXtify";
+std::string feedbackText = "Se inicia automaticamente con SpotiBacán";
 std::string readyText = "No iniciado";
 bool automaticLaunchActive = false;
 unsigned automaticLaunchAttempt = 0;
@@ -71,7 +71,7 @@ std::chrono::steady_clock::time_point nextServiceSupervision{};
 
 void logOverlay(const char* fmt, ...) {
   mkdir("sdmc:/config", 0777);
-  mkdir("sdmc:/config/NXtify", 0777);
+  mkdir("sdmc:/config/SpotiBacan", 0777);
   FILE* file = std::fopen(OverlayLogPath, "a");
   if (!file) return;
 
@@ -189,18 +189,18 @@ void disconnectIpc() {
 std::string engineStateText(const SwitifyIpcStatus& status) {
   switch (status.service_state) {
     case SwitifyServiceState_Booting:
-      return "Iniciando motor de NXtify";
+      return "Iniciando motor de SpotiBacán";
     case SwitifyServiceState_WaitingForCredentials:
-      return "Inicia sesion en la app NXtify primero";
+      return "Inicia sesion en la app SpotiBacán primero";
     case SwitifyServiceState_Pairing:
-      return "Esperando a NXtify Connect";
+      return "Esperando a SpotiBacán Connect";
     case SwitifyServiceState_Connecting:
-      return "Conectando a NXtify";
+      return "Conectando a SpotiBacán";
     case SwitifyServiceState_Ready:
       return (status.flags & SwitifyStatusFlag_Connected) ? "En linea"
                                                          : "Listo";
     case SwitifyServiceState_Error:
-      return "Error en motor de NXtify";
+      return "Error en motor de SpotiBacán";
     case SwitifyServiceState_Stopping:
       return "Deteniendo";
     default:
@@ -335,7 +335,7 @@ void refreshServiceState(bool updateFeedback = true) {
   } else if (status.service_state == SwitifyServiceState_Connecting && status.album[0] != '\0') {
     feedbackText = boundedText(status.album, sizeof(status.album));
   } else if (status.service_state == SwitifyServiceState_WaitingForCredentials) {
-    feedbackText = "Inicia sesion en la app NXtify primero";
+    feedbackText = "Inicia sesion en la app SpotiBacán primero";
   } else if (updateFeedback) {
     feedbackText = "Conexion en segundo plano activa";
   }
@@ -381,7 +381,7 @@ void launchService() {
   runningPid = pid;
   connectionState = ConnectionState::Starting;
   serviceText = "Iniciando";
-  feedbackText = "Iniciando NXtify en segundo plano";
+  feedbackText = "Iniciando SpotiBacán en segundo plano";
   readyText = "Esperando comprobacion";
 }
 
@@ -957,7 +957,7 @@ class BrowseGui final : public tsl::Gui {
   tsl::elm::Element* createUI() override {
     claimExclusiveInput(true);
     superviseAutomaticService(true);
-    auto* frame = new tsl::elm::OverlayFrame("NXtify", "Explorador de NXtify");
+    auto* frame = new tsl::elm::OverlayFrame("SpotiBacán", "Explorador de SpotiBacán");
     auto* list = new tsl::elm::List();
     Result result = switifyIpcGetBrowseHeader(&header);
     if (R_FAILED(result) ||
@@ -967,23 +967,23 @@ class BrowseGui final : public tsl::Gui {
       list->addItem(new tsl::elm::CategoryHeader("Explorador no disponible"));
       list->addItem(new tsl::elm::ListItem(
           automaticLaunchActive ? "El servicio se esta reiniciando"
-                                : "No se pudo leer el contenido de NXtify",
+                                : "No se pudo leer el contenido de SpotiBacán",
           resultText(result)));
     } else if (header.generation == previousGeneration &&
                header.state != SwitifyBrowseState_Loading) {
-      list->addItem(new tsl::elm::CategoryHeader("Abriendo NXtify"));
+      list->addItem(new tsl::elm::CategoryHeader("Abriendo SpotiBacán"));
       list->addItem(new tsl::elm::ListItem("Cargando...", "Espera un momento"));
     } else {
       const std::string title = browseText(header.title, sizeof(header.title));
       const std::string subtitle =
           browseText(header.subtitle, sizeof(header.subtitle));
       list->addItem(new tsl::elm::CategoryHeader(
-          title.empty() ? "NXtify" : title));
+          title.empty() ? "SpotiBacán" : title));
       if (!subtitle.empty())
         list->addItem(
             new tsl::elm::CategoryHeader(clipped(subtitle, 42)));
       if (header.state == SwitifyBrowseState_Loading) {
-        list->addItem(new tsl::elm::ListItem("Cargando contenido de NXtify...", ""));
+        list->addItem(new tsl::elm::ListItem("Cargando contenido de SpotiBacán...", ""));
       } else if (header.state == SwitifyBrowseState_Error) {
         list->addItem(new tsl::elm::ListItem(
             clipped(browseText(header.message, sizeof(header.message)), 44),
@@ -1161,7 +1161,7 @@ class SearchKeyboardElement final : public tsl::elm::Element {
     const tsl::Color green = a({0x1, 0xD, 0x6, 0xF});
     renderer->drawRect(x + 10, y + 14, width - 20, 43,
                        a(tsl::style::color::ColorFrame));
-    renderer->drawString(query.empty() ? "Buscar en NXtify" : clipped(query, 34),
+    renderer->drawString(query.empty() ? "Buscar en SpotiBacán" : clipped(query, 34),
                          false, x + 20, y + 43, 21,
                          a(tsl::style::color::ColorText));
     const s32 top = y + 76;
@@ -1263,9 +1263,9 @@ void openBrowser(Result (*request)()) {
         currentStatus.service_state == SwitifyServiceState_Error) {
       feedbackText = currentStatus.album[0] != '\0'
                          ? boundedText(currentStatus.album, sizeof(currentStatus.album))
-                         : "Error en motor de NXtify";
+                         : "Error en motor de SpotiBacán";
     } else {
-      feedbackText = "NXtify aun se esta iniciando";
+      feedbackText = "SpotiBacán aun se esta iniciando";
     }
     return;
   }
@@ -1282,7 +1282,7 @@ class ServiceGui final : public tsl::Gui {
   tsl::elm::Element* createUI() override {
     claimExclusiveInput(true);
     superviseAutomaticService(true);
-    auto* frame = new tsl::elm::OverlayFrame("NXtify", "Servicio y ajustes");
+    auto* frame = new tsl::elm::OverlayFrame("SpotiBacán", "Servicio y ajustes");
     auto* list = new tsl::elm::List();
     list->addItem(new tsl::elm::CategoryHeader("Reproduccion en segundo plano"));
     serviceItem = new tsl::elm::ListItem("Servicio", serviceText);
@@ -1334,15 +1334,15 @@ class ServiceGui final : public tsl::Gui {
     list->addItem(new tsl::elm::ListItem(
         "Normal 160 kbps / Alta 320 kbps", "Reiniciar para aplicar"));
     list->addItem(new tsl::elm::CategoryHeader(
-        "Inicia sesion una vez en la app NXtify"));
+        "Inicia sesion una vez en la app SpotiBacán"));
     list->addItem(new tsl::elm::CategoryHeader("Registros (Logs)"));
-    list->addItem(new tsl::elm::ListItem("Log overlay", "/config/NXtify/overlay.log"));
-    list->addItem(new tsl::elm::ListItem("Log motor", "/config/NXtify/background.log"));
+    list->addItem(new tsl::elm::ListItem("Log overlay", "/config/SpotiBacan/overlay.log"));
+    list->addItem(new tsl::elm::ListItem("Log motor", "/config/SpotiBacan/background.log"));
     list->addItem(new tsl::elm::CategoryHeader("Creditos"));
     list->addItem(new tsl::elm::ListItem("Port moderno y motor", "noesio582-boop"));
     list->addItem(new tsl::elm::ListItem("Repo base antiguo", "HiroshiYamauchi"));
     list->addItem(new tsl::elm::ListItem("GitHub", "noesio582-boop"));
-    list->addItem(new tsl::elm::ListItem("NXtify Connect", "Activado (Nintendo Switch)"));
+    list->addItem(new tsl::elm::ListItem("SpotiBacán Connect", "Activado (Nintendo Switch)"));
     frame->setContent(list);
     sync();
     nextRefresh = std::chrono::steady_clock::now() + RefreshInterval;
@@ -1389,7 +1389,7 @@ class NowPlayingGui final : public tsl::Gui {
   tsl::elm::Element* createUI() override {
     claimExclusiveInput(true);
     superviseAutomaticService(true);
-    auto* frame = new tsl::elm::OverlayFrame("NXtify", "Reproduciendo");
+    auto* frame = new tsl::elm::OverlayFrame("SpotiBacán", "Reproduciendo");
     auto* list = new tsl::elm::List();
     player = new PlayerElement();
     list->addItem(player, PlayerElement::Height);
@@ -1425,11 +1425,11 @@ class MainGui final : public tsl::Gui {
   tsl::elm::Element* createUI() override {
     claimExclusiveInput(true);
     superviseAutomaticService(true);
-    auto* frame = new tsl::elm::OverlayFrame("NXtify", OverlayVersion);
+    auto* frame = new tsl::elm::OverlayFrame("SpotiBacán", OverlayVersion);
     auto* list = new tsl::elm::List();
     player = new PlayerElement();
     list->addItem(player, PlayerElement::Height);
-    list->addItem(new tsl::elm::CategoryHeader("Explorar NXtify"));
+    list->addItem(new tsl::elm::CategoryHeader("Explorar SpotiBacán"));
     list->addItem(actionItem("Inicio", "Para ti", [] {
       openBrowser(switifyIpcBrowseHome);
     }));
@@ -1445,9 +1445,9 @@ class MainGui final : public tsl::Gui {
             currentStatus.service_state == SwitifyServiceState_Error) {
           feedbackText = currentStatus.album[0] != '\0'
                              ? boundedText(currentStatus.album, sizeof(currentStatus.album))
-                             : "Error en motor de NXtify";
+                             : "Error en motor de SpotiBacán";
         } else {
-          feedbackText = "NXtify aun se esta iniciando";
+          feedbackText = "SpotiBacán aun se esta iniciando";
         }
       }
     }));
@@ -1486,7 +1486,7 @@ class MainGui final : public tsl::Gui {
 class NXtifyOverlay final : public tsl::Overlay {
  public:
   void initServices() override {
-    logOverlay("NXtifyOverlay: initServices (version %s)", OverlayVersion);
+    logOverlay("SpotiBacánOverlay: initServices (version %s)", OverlayVersion);
     refreshServiceState(false);
     if (connectionState != ConnectionState::Connected &&
         connectionState != ConnectionState::Incompatible) {
@@ -1496,13 +1496,13 @@ class NXtifyOverlay final : public tsl::Overlay {
   }
 
   void exitServices() override {
-    logOverlay("NXtifyOverlay: exitServices");
+    logOverlay("SpotiBacánOverlay: exitServices");
     switify::artwork::shutdown();
     disconnectIpc();
   }
 
   void onHide() override {
-    logOverlay("NXtifyOverlay: onHide");
+    logOverlay("SpotiBacánOverlay: onHide");
     // The playback engine is a separate Atmosphere process and continues
     // normally. Release every overlay-owned worker, BSD session, and IPC
     // handle before Ultrahand returns to the game or HOME menu.
@@ -1511,7 +1511,7 @@ class NXtifyOverlay final : public tsl::Overlay {
   }
 
   void onShow() override {
-    logOverlay("NXtifyOverlay: onShow");
+    logOverlay("SpotiBacánOverlay: onShow");
     refreshServiceState(false);
     if (connectionState != ConnectionState::Connected &&
         connectionState != ConnectionState::Incompatible) {

@@ -329,10 +329,10 @@ void App::drawSheet() {
             }
             if (pl.automix) {   // an Automix playlist: this track first (pinned), or Gatefold's choice again
                 const bool pinned = pl.pin == tr.path;
-                items.push_back({ ICON_LINK, pinned ? ::tr("Let NXtify choose the first track", "Dejar que NXtify elija la primera cancion") : ::tr("Play this first", "Reproducir esta primero"), "", [this, ref = route.ref, pinned, path = tr.path] {
+                items.push_back({ ICON_LINK, pinned ? ::tr("Let SpotiBacán choose the first track", "Dejar que SpotiBacán elija la primera cancion") : ::tr("Play this first", "Reproducir esta primero"), "", [this, ref = route.ref, pinned, path = tr.path] {
                                       store.playlists[ref].pin = pinned ? "" : path;
                                       orderAutomixList(ref, false);
-                                      toast(pinned ? ::tr("NXtify chooses the first track again", "NXtify elige la primera cancion de nuevo") : ::tr("Plays first; the rest ordered after it", "Sonara primero; el resto ordenado despues"));
+                                      toast(pinned ? ::tr("SpotiBacán chooses the first track again", "SpotiBacán elige la primera cancion de nuevo") : ::tr("Plays first; the rest ordered after it", "Sonara primero; el resto ordenado despues"));
                                       closeSheet();
                                   } });
             }
@@ -408,7 +408,7 @@ void App::drawSheet() {
         info(::tr("Lyrics", "Letras"), !now.lyrics.empty() ? (now.synced ? std::string(::tr("Synced (", "Sincronizadas (")) + now.lyricsSource + ")" : std::string(::tr("Text (", "Texto (")) + now.lyricsSource + ")") : ::tr("Unavailable", "No disponibles"));
         if (const auto it = store.lyricNudge.find(tr.path); it != store.lyricNudge.end()) {   // the timing control (Now playing, the Canvas)
             char b[64];
-            snprintf(b, sizeof b, ::tr("%.1f s %s, kept by NXtify", "%.1f s %s, guardado por NXtify"), double(std::fabs(it->second)), it->second > 0 ? ::tr("later", "despues") : ::tr("earlier", "antes"));
+            snprintf(b, sizeof b, ::tr("%.1f s %s, kept by SpotiBacán", "%.1f s %s, guardado por SpotiBacán"), double(std::fabs(it->second)), it->second > 0 ? ::tr("later", "despues") : ::tr("earlier", "antes"));
             info(::tr("Lyrics timing", "Sincronia de letras"), b);
         }
         info(::tr("URI", "URI"), tr.path);
@@ -520,7 +520,7 @@ void App::drawSheet() {
         ry += it.h;
     }
     if (page == Sheet::Tags && sheet.page == page) {
-        g.text(::tr("Kept by NXtify and shown everywhere in the app.", "Guardado por NXtify y mostrado en toda la aplicacion."), { css::Sm }, x + 24, ry + 10, pal.text3, 1,
+        g.text(::tr("Kept by SpotiBacán and shown everywhere in the app.", "Guardado por SpotiBacán y mostrado en toda la aplicacion."), { css::Sm }, x + 24, ry + 10, pal.text3, 1,
                Align::Left, int(w - 48));
         ry += 34;
     }

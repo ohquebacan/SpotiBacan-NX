@@ -38,7 +38,7 @@ std::string downloaderWebToken();
 namespace {
 
 constexpr const char* ROOT = "sdmc:/music/SpotiBacan";
-constexpr const char* CREDENTIALS[] = { "sdmc:/config/NXtify/credentials.json", "sdmc:/config/Switify/credentials.json" };
+constexpr const char* CREDENTIALS[] = { "sdmc:/config/SpotiBacan/credentials.json", "sdmc:/config/Switify/credentials.json" };
 constexpr size_t SPOTIFY_HEADER = 167;   // pagina Ogg senuelo que Spotify antepone al Vorbis real
 const uint8_t AUDIO_IV[16] = { 0x72, 0xe0, 0x67, 0xfb, 0xdd, 0xcb, 0xcf, 0x77,
                                0xeb, 0xe8, 0xbc, 0x64, 0x3f, 0x63, 0x0d, 0x93 };

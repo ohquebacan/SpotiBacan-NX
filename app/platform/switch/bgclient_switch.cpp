@@ -27,7 +27,7 @@ struct IpcBusyScope {
     ~IpcBusyScope() { g_ipcBusy.store(false); }
 };
 constexpr u64 kSysmoduleProgramId = 0x4200000000535754ull;
-const char* const kReadyPath = "sdmc:/config/NXtify/background-ready.log";
+const char* const kReadyPath = "sdmc:/config/SpotiBacan/background-ready.log";
 const char* const kReadyPathLegacy = "sdmc:/config/Switify/background-ready.log";
 
 bool isSysmoduleRunning(uint64_t* out_pid) {
@@ -105,7 +105,7 @@ void BgClient::disconnect() {
 }
 
 void BgClient::checkArtwork() {
-    FILE* f = fopen("sdmc:/config/NXtify/current-artwork-url", "r");
+    FILE* f = fopen("sdmc:/config/SpotiBacan/current-artwork-url", "r");
     if (!f) f = fopen("sdmc:/config/Switify/current-artwork-url", "r");
     if (f) {
         char buf[256] = {};
@@ -123,7 +123,7 @@ void BgClient::checkArtwork() {
                 }
                 char hex[17] = {};
                 snprintf(hex, sizeof(hex), "%016llx", static_cast<unsigned long long>(hash));
-                std::string primary = std::string("sdmc:/config/NXtify/artwork-cache/") + hex + ".img";
+                std::string primary = std::string("sdmc:/config/SpotiBacan/artwork-cache/") + hex + ".img";
                 FILE* tf = fopen(primary.c_str(), "rb");
                 if (tf) {
                     fclose(tf);
@@ -210,7 +210,7 @@ bool BgClient::setQueue(const BgQueue& q) {
 }
 
 bool BgClient::getQueue(BgQueue& q) {
-    q.name = "NXtify";
+    q.name = "SpotiBacán";
     q.pos = st_.pos;
     q.mode = 0;
     q.paths = { "spotify:track:current" };

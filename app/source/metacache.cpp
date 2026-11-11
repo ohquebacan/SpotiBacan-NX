@@ -389,9 +389,9 @@ void MetaCache::run() {
                 char hex[17] = {};
                 snprintf(hex, sizeof(hex), "%016llx", static_cast<unsigned long long>(hash));
                 mkdir("sdmc:/config", 0777);
-                mkdir("sdmc:/config/NXtify", 0777);
-                mkdir("sdmc:/config/NXtify/artwork-cache", 0777);
-                localFile = std::string("sdmc:/config/NXtify/artwork-cache/") + hex + ".img";
+                mkdir("sdmc:/config/SpotiBacan", 0777);
+                mkdir("sdmc:/config/SpotiBacan/artwork-cache", 0777);
+                localFile = std::string("sdmc:/config/SpotiBacan/artwork-cache/") + hex + ".img";
                 FILE* test = fopen(localFile.c_str(), "rb");
                 bool valid = false;
                 if (test) {
@@ -471,9 +471,9 @@ void MetaCache::cacheArtOnly(int idx, const std::string& jobPath, const std::str
             char hex[17] = {};
             snprintf(hex, sizeof(hex), "%016llx", static_cast<unsigned long long>(hash));
             mkdir("sdmc:/config", 0777);
-            mkdir("sdmc:/config/NXtify", 0777);
-            mkdir("sdmc:/config/NXtify/artwork-cache", 0777);
-            localFile = std::string("sdmc:/config/NXtify/artwork-cache/") + hex + ".img";
+            mkdir("sdmc:/config/SpotiBacan", 0777);
+            mkdir("sdmc:/config/SpotiBacan/artwork-cache", 0777);
+            localFile = std::string("sdmc:/config/SpotiBacan/artwork-cache/") + hex + ".img";
             FILE* test = fopen(localFile.c_str(), "rb");
             bool valid = false;
             if (test) {

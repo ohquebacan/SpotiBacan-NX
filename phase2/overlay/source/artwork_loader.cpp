@@ -40,9 +40,9 @@ constexpr size_t MaxEncodedBytes = 384 * 1024;
 constexpr size_t MaxCacheEntries = 128;
 constexpr uint64_t RetryDelayNs = UINT64_C(5000000000);
 constexpr const char* CacheDirectory =
-    "sdmc:/config/NXtify/artwork-cache";
+    "sdmc:/config/SpotiBacan/artwork-cache";
 constexpr const char* CacheIndex =
-    "sdmc:/config/NXtify/artwork-cache/index";
+    "sdmc:/config/SpotiBacan/artwork-cache/index";
 
 constexpr SocketInitConfig SocketConfig = {
     .tcp_tx_buf_size = 0x800,
@@ -179,7 +179,7 @@ std::vector<uint8_t> readFile(const std::string& path) {
 void saveFile(const std::string& url, const std::vector<uint8_t>& bytes) {
   if (!supportedJpeg(bytes)) return;
   mkdir("sdmc:/config", 0755);
-  mkdir("sdmc:/config/NXtify", 0755);
+  mkdir("sdmc:/config/SpotiBacan", 0755);
   mkdir(CacheDirectory, 0755);
   const std::string destination = cachePath(url);
   const std::string temporary = destination + ".overlay.tmp";

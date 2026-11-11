@@ -78,7 +78,7 @@ void App::drawPlaylists(float x, float y, float w, float h) {
     if (smart) sub += "  ·  " + std::to_string(smart) + tr(" smart", " inteligentes");
     if (folder) sub += "  ·  " + std::to_string(folder) + (folder == 1 ? tr(" from a folder", " de una carpeta") : tr(" from folders", " de carpetas"));
     float cy = oy + 18 + 8;
-    kicker("NXtify", x + 28, cy, pal.text3);
+    kicker("SpotiBacán", x + 28, cy, pal.text3);
     cy += 10;
     g.text("Playlists", { css::Xxl, Weight::Bold }, x + 28, cy, pal.text, 1, Align::Left, int(w - 56));
     cy += 38;

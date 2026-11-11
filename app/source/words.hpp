@@ -74,7 +74,7 @@ inline const char* tr(const char* en, const char* es) {
 #define GF_THIS_CONSOLE "this console"
 #define GF_CAP_THIS_CONSOLE "This console"
 #define GF_ON_THE_PADS "On the Joy-Cons, "
-#define GF_CONFIG_NAME "config/NXtify"
+#define GF_CONFIG_NAME "config/SpotiBacan"
 #define GF_CLOSE_SAFE "so closing from the HOME menu loses nothing."
 #define GF_TOUR_BG_WORDS "the background player and the overlay, "
 #define GF_BG_CARD "Background player"

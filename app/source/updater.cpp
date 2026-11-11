@@ -32,7 +32,7 @@ constexpr const char* kManifest = "songate-manifest.json";
 constexpr const char* kSysDir = "atmosphere/contents/4200000000535754/";   // the SpotiBacán background player's
 constexpr const char* kSysDirOld = "atmosphere/contents/4200000047464E58/";
 constexpr const char* kNro = "switch/SpotiBacan/SpotiBacan.nro";
-constexpr const char* kOverlay = "switch/.overlays/NXtify.ovl";
+constexpr const char* kOverlay = "switch/.overlays/SpotiBacan.ovl";
 // Before the rebranding (1.x, as Gatefold NX): where its files are, for going back to one, and cleared after (cleanLegacy)
 constexpr const char* kNroV1 = "switch/Gatefold/Gatefold.nro";
 constexpr const char* kOverlayV1 = "switch/.overlays/Gatefold.ovl";

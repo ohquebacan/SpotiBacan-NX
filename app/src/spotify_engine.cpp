@@ -51,17 +51,17 @@ class NullAudioSink : public AudioSink {
 #endif
 
 namespace {
-constexpr const char* CONFIG_DIR = "/config/NXtify";
+constexpr const char* CONFIG_DIR = "/config/SpotiBacan";
 constexpr const char* CREDENTIALS_FILE =
-    "/config/NXtify/credentials.json";
+    "/config/SpotiBacan/credentials.json";
 constexpr const char* CREDENTIALS_FILE_POC =
     "/config/switify-poc/credentials.json";
 constexpr const char* NO_MIGRATION_FILE =
-    "/config/NXtify/do-not-import-poc-credentials";
+    "/config/SpotiBacan/do-not-import-poc-credentials";
 constexpr const char* PLAYBACK_SESSION_FILE =
-    "/config/NXtify/playback-session.json";
+    "/config/SpotiBacan/playback-session.json";
 constexpr int ZEROCONF_PORT = 7864;
-constexpr const char* DEVICE_NAME = "Nintendo Switch";
+constexpr const char* DEVICE_NAME = "SpotiBacan (Switch)";
 const char* defaultClientIdHex() {
   static char hex[33] = {};
   if (hex[0] == '\0') {
@@ -1687,7 +1687,7 @@ bool SpotifyEngine::forgetCredentials() {
   std::remove(PLAYBACK_SESSION_FILE);
   std::remove((std::string(PLAYBACK_SESSION_FILE) + ".tmp").c_str());
   std::ofstream marker(NO_MIGRATION_FILE);
-  marker << "NXtify sign-out marker\n";
+  marker << "SpotiBacán sign-out marker\n";
   {
     std::lock_guard<std::mutex> lock(dataMutex);
     dashboardCache = {};
@@ -1807,7 +1807,7 @@ std::string SpotifyEngine::spotifyClientToken() {
     WebHeaders headers = {
         {"Accept", "application/x-protobuf"},
         {"Content-Type", "application/x-protobuf"},
-        {"User-Agent", "Spotify/127700358 Linux/0 (NXtify)"}};
+        {"User-Agent", "Spotify/127700358 Linux/0 (SpotiBacan)"}};
     const auto response = webRequest(url, "POST", request, headers, &running);
     nxlog::pushf(
         "Client token HTTP response (status=%d, bytes=%d, length=%s, "
@@ -1885,7 +1885,7 @@ std::string SpotifyEngine::login5AccessToken() {
     WebHeaders headers = {
         {"Accept", "application/x-protobuf"},
         {"Content-Type", "application/x-protobuf"},
-        {"User-Agent", "Spotify/127700358 Linux/0 (NXtify)"},
+        {"User-Agent", "Spotify/127700358 Linux/0 (SpotiBacan)"},
         {"Client-Token", clientToken}};
     auto response = webRequest(url, "POST", request, headers, &running);
     auto& body = response.body;
@@ -1970,7 +1970,7 @@ std::string SpotifyEngine::partnerRequest(
         {"Accept", "application/json"},
         {"Accept-Language", "es-419,es;q=0.9,en-US;q=0.8"},
         {"app-platform", "WebPlayer"},
-        {"User-Agent", "Spotify/127700358 Linux/0 (NXtify)"}};
+        {"User-Agent", "Spotify/127700358 Linux/0 (SpotiBacan)"}};
     const auto started = std::chrono::steady_clock::now();
     WebResponse response;
     try {
@@ -2048,7 +2048,7 @@ std::string SpotifyEngine::connectRequest(const std::string& url) {
         {"Accept", "application/json"},
         {"Accept-Language", "es-419,es;q=0.9,en-US;q=0.8"},
         {"app-platform", "WebPlayer"},
-        {"User-Agent", "Spotify/127700358 Linux/0 (NXtify)"}};
+        {"User-Agent", "Spotify/127700358 Linux/0 (SpotiBacan)"}};
     const auto started = std::chrono::steady_clock::now();
     const auto response = webRequest(url, "GET", {}, headers, &running);
     const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -2264,7 +2264,7 @@ std::string SpotifyEngine::apiRequest(const std::string& method,
     WebHeaders headers = {
         {"Authorization", "Bearer " + token},
         {"Accept", "application/json"},
-        {"User-Agent", "Spotify/127700358 Linux/0 (NXtify)"}};
+        {"User-Agent", "Spotify/127700358 Linux/0 (SpotiBacan)"}};
     std::vector<uint8_t> requestBody(jsonBody.begin(), jsonBody.end());
     if (!requestBody.empty())
       headers.emplace_back("Content-Type", "application/json");
@@ -2394,7 +2394,7 @@ void SpotifyEngine::fetchDashboard(
   launchWorker([this, cb = std::move(cb)] {
     Result<HomeData> result;
     if (currentState != State::Ready) {
-      result.error = "NXtify aun se esta conectando";
+      result.error = "SpotiBacán aun se esta conectando";
       cb(std::move(result));
       return;
     }
@@ -2643,7 +2643,7 @@ void SpotifyEngine::fetchDashboard(
 
     if (successfulSections == 0)
       result.error = result.value.warning.empty()
-                         ? "No se pudo cargar el Inicio de NXtify"
+                         ? "No se pudo cargar el Inicio de SpotiBacán"
                          : result.value.warning;
     nxlog::pushf(
                  "Dashboard: %d contexts, %d recent, %d top, %d playlists, "
@@ -2695,7 +2695,7 @@ void SpotifyEngine::fetchLibrary(
   launchWorker([this, cb = std::move(cb)] {
     Result<LibraryData> result;
     if (currentState != State::Ready) {
-      result.error = "NXtify aun se esta conectando";
+      result.error = "SpotiBacán aun se esta conectando";
       cb(std::move(result));
       return;
     }
@@ -2805,7 +2805,7 @@ void SpotifyEngine::fetchPlaylistTrackPage(
     Result<TrackPage> result;
     result.value.offset = offset;
     if (currentState != State::Ready) {
-      result.error = "NXtify aun se esta conectando";
+      result.error = "SpotiBacán aun se esta conectando";
       cb(std::move(result));
       return;
     }
@@ -2883,7 +2883,7 @@ void SpotifyEngine::fetchPlaylistTracks(
   launchWorker([this, collection, cb = std::move(cb)] {
     Result<std::vector<Track>> result;
     if (currentState != State::Ready) {
-      result.error = "NXtify aun se esta conectando";
+      result.error = "SpotiBacán aun se esta conectando";
       cb(std::move(result));
       return;
     }
@@ -3066,7 +3066,7 @@ void SpotifyEngine::search(const std::string& query,
   launchWorker([this, query, cb = std::move(cb)] {
     Result<SearchResults> result;
     if (currentState != State::Ready) {
-      result.error = "NXtify aun se esta conectando";
+      result.error = "SpotiBacán aun se esta conectando";
       cb(std::move(result));
       return;
     }
@@ -3155,7 +3155,7 @@ void SpotifyEngine::fetchLyrics(
   launchWorker([this, trackUriOrId, cb = std::move(cb)] {
     Result<LyricsData> result;
     if (currentState != State::Ready) {
-      result.error = "NXtify aun se esta conectando";
+      result.error = "SpotiBacán aun se esta conectando";
       cb(std::move(result));
       return;
     }
@@ -3679,7 +3679,7 @@ void SpotifyEngine::retryConnection() {
     retryRequested = true;
   }
   nxlog::push("Manual Spotify connection retry requested");
-  setState(State::Connecting, "Reintentando conexion con NXtify...");
+  setState(State::Connecting, "Reintentando conexion con SpotiBacán...");
   retryCondition.notify_one();
 }
 
@@ -3709,7 +3709,7 @@ void SpotifyEngine::run() {
     if (!interactiveAuthentication.load()) {
 #endif
       setState(State::NoConfig,
-               "Abre la aplicacion NXtify e inicia sesion antes de usar el overlay");
+               "Abre la aplicacion SpotiBacán e inicia sesion antes de usar el overlay");
       return;
     }
 
@@ -3727,7 +3727,7 @@ void SpotifyEngine::run() {
         },
         [] {});
     if (!zeroconfServer->start()) {
-      setState(State::Error, "No se pudo iniciar el servicio de inicio de sesion de NXtify");
+      setState(State::Error, "No se pudo iniciar el servicio de inicio de sesion de SpotiBacán");
       return;
     }
     mdnsService = bell::MDNSService::registerService(
@@ -3743,7 +3743,7 @@ void SpotifyEngine::run() {
   if (!running) return;
 
   while (running) {
-  setState(State::Connecting, "Conectando de forma segura a NXtify...");
+  setState(State::Connecting, "Conectando de forma segura a SpotiBacán...");
   try {
     ctx = cspot::Context::createFromBlob(loginBlob);
     ctx->config.clientId = WEB_CLIENT_ID;
@@ -3913,14 +3913,14 @@ void SpotifyEngine::run() {
       try {
         ctx->session->handlePacket();
       } catch (const std::exception& error) {
-        throw std::runtime_error(std::string("Error de sesion de NXtify: ") +
+        throw std::runtime_error(std::string("Error de sesion de SpotiBacán: ") +
                                  error.what());
       }
     }
   } catch (const std::exception& error) {
     if (running)
       setState(State::Error,
-               std::string("Error del motor de NXtify: ") + error.what());
+               std::string("Error del motor de SpotiBacán: ") + error.what());
   }
 
   if (!running) break;

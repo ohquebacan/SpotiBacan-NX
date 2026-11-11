@@ -224,9 +224,9 @@ void ThumbWorker::run() {
                 char hexbuf[17] = {};
                 snprintf(hexbuf, sizeof(hexbuf), "%016llx", static_cast<unsigned long long>(hash));
                 mkdir("sdmc:/config", 0777);
-                mkdir("sdmc:/config/NXtify", 0777);
-                mkdir("sdmc:/config/NXtify/artwork-cache", 0777);
-                localFile = std::string("sdmc:/config/NXtify/artwork-cache/") + hexbuf + ".img";
+                mkdir("sdmc:/config/SpotiBacan", 0777);
+                mkdir("sdmc:/config/SpotiBacan/artwork-cache", 0777);
+                localFile = std::string("sdmc:/config/SpotiBacan/artwork-cache/") + hexbuf + ".img";
                 bool valid = false;
                 if (exists(localFile)) {
                     if (FILE* f = fopen(localFile.c_str(), "rb")) {

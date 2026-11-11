@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "downloader.hpp"
 #include "app.hpp"
 #include "icons.inc"
 
@@ -202,6 +203,11 @@ bool App::coverRow(Id id, int track, int number, float x, float y, float w, floa
         g.textC(t.date.substr(0, 4), { css::Base }, cx, cy, pal.text2, 1, Align::Left, 64);
         cx += 64 + gap;
         g.textC(t.genre, { css::Base }, cx, cy, pal.text2, 1, Align::Left, int(fr));
+    }
+    {   // SpotiBacan (vista Grande): marca de descargada
+        const bool dl = g_bigLayout && t.path.rfind("spotify:track:", 0) == 0 &&
+                        Downloader::instance().isDownloaded(DlJob{ t.path, t.title, t.albumArtist.empty() ? t.artist : t.albumArtist, t.album, t.trackNo });
+        if (dl) g.icon(ICON_CHECK, x + w - pad - 58, cy, 15, pal.accentInk);
     }
     g.textC(t.duration > 0 ? fmtTime(t.duration) : "", { css::Sm }, x + w - pad, cy, pal.text3, 1, Align::Right);
     return hit;

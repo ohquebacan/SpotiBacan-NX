@@ -222,7 +222,7 @@ void App::drawAutomixPicker() {
     g.roundRect(ix, Y + pad, 40, 40, 10, pal.accent, 0.14f);
     g.icon(ICON_SPARKLE, ix + 20, Y + pad + 20, 20, pal.accentInk);   // the Automix playlists' icon
     kicker("New Automix playlist", ix + 54, Y + pad + 7, pal.accentInk);
-    g.text(tr("Pick the songs; NXtify orders them for the best joins", "Elige las canciones; NXtify las ordena para las mejores uniones"), { css::Lg, Weight::Bold }, ix + 54, Y + pad + 16, pal.text, 1, Align::Left,
+    g.text(tr("Pick the songs; SpotiBacán orders them for the best joins", "Elige las canciones; SpotiBacán las ordena para las mejores uniones"), { css::Lg, Weight::Bold }, ix + 54, Y + pad + 16, pal.text, 1, Align::Left,
            int(iw - 54 - 260));
     hint(uid("ap.x"), "Close");
     if (iconButton(uid("ap.x"), ICON_X, X + W - pad - 17, Y + pad + 20)) { closeAutomixPicker(); return; }

@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "downloader.hpp"
 #include "app.hpp"
 #include "icons.inc"
 
@@ -442,6 +443,13 @@ void App::listHead(float x, float y, float w, bool showAlbum) {
     g.rect(x, y + 29, w, 1, pal.text, 0.09f);
 }
 
+
+// SpotiBacan (vista Grande): una marca en las canciones de Spotify que ya estan en la SD. Va a memoria, no a la SD.
+static bool downloadedMark(const Track& t) {
+    if (!g_bigLayout || t.path.rfind("spotify:track:", 0) != 0) return false;
+    return Downloader::instance().isDownloaded(DlJob{ t.path, t.title, t.albumArtist.empty() ? t.artist : t.albumArtist, t.album, t.trackNo });
+}
+
 bool App::trackRow(Id id, int track, int number, float x, float y, float w, float h, bool showAlbum) {
     const Track& t = lib.tracks[track];
     meta.wantTags(track);
@@ -467,6 +475,7 @@ bool App::trackRow(Id id, int track, int number, float x, float y, float w, floa
     g.textC(t.artist, { css::Base }, cx, cy, pal.text2, 1, Align::Left, int(fr));
     cx += fr + gap;
     if (showAlbum) { g.textC(t.album, { css::Base }, cx, cy, pal.text2, 1, Align::Left, int(fr)); cx += fr + gap; }
+    if (downloadedMark(t)) g.icon(ICON_CHECK, cx + 64 - 52, cy, 15, pal.accentInk);
     g.textC(t.duration > 0 ? fmtTime(t.duration) : "", { css::Sm }, cx + 64, cy, pal.text3, 1, Align::Right);
     return hit;
 }

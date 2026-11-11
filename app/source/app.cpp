@@ -4,6 +4,7 @@
  */
 #include "downloader.hpp"
 #include "qrcodegen.h"
+#include "spotibacan_migrate.hpp"
 #include "app.hpp"
 #include "cores.hpp"
 #include "icons.inc"
@@ -2250,11 +2251,11 @@ void App::loadSpotifySessionLibrary(bool force) {
     std::string path = store.path("playback-session.json");
     struct stat st;
     if (stat(path.c_str(), &st) != 0) {
-        path = "sdmc:/config/NXtify/playback-session.json";
+        path = "sdmc:/config/SpotiBacan/playback-session.json";
         if (stat(path.c_str(), &st) != 0) {
             path = "sdmc:/config/Switify/playback-session.json";
             if (stat(path.c_str(), &st) != 0) {
-                path = "E:/config/NXtify/playback-session.json";
+                path = "E:/config/SpotiBacan/playback-session.json";
                 if (stat(path.c_str(), &st) != 0) {
                     LOG("loadSpotifySessionLibrary: no playback-session.json found.");
                     return;
@@ -2269,7 +2270,7 @@ void App::loadSpotifySessionLibrary(bool force) {
     lastSessionMtime_ = static_cast<uint64_t>(st.st_mtime);
     FILE* f = fopen(path.c_str(), "rb");
     if (!f) {
-        path = "sdmc:/config/NXtify/playback-session.json";
+        path = "sdmc:/config/SpotiBacan/playback-session.json";
         f = fopen(path.c_str(), "rb");
     }
     if (!f) {
@@ -2608,7 +2609,7 @@ void App::saveSpotifySession(int targetPos) {
     json += "\n  ]\n}\n";
 
     std::vector<std::string> paths = {
-        "sdmc:/config/NXtify/playback-session.json",
+        "sdmc:/config/SpotiBacan/playback-session.json",
         store.path("playback-session.json")
     };
     for (const auto& p : paths) {
@@ -4104,8 +4105,15 @@ std::string App::trackSub(int t) const {
 
 
 int main(int argc, char** argv) {
+#ifdef __SWITCH__
+    spotibacanMigrateConfig("sdmc:");   // antes del log: el log ya va a la carpeta nueva
+    {   // el overlay viejo de NXtify, si ya esta el de SpotiBacan: que no salgan dos en Ultrahand
+        struct stat st;
+        if (stat("sdmc:/switch/.overlays/SpotiBacan.ovl", &st) == 0) remove("sdmc:/switch/.overlays/NXtify.ovl");
+    }
+#endif
     logInit();
-    LOG("=== NXtify UI Main Started ===");
+    LOG("=== SpotiBacán UI Main Started ===");
 #ifdef __SWITCH__
     LOG("Applet Type: %d (0=Application, 1=System, 2=Library, 3=Overlay)", int(appletGetAppletType()));
 #endif
@@ -4137,7 +4145,7 @@ int main(int argc, char** argv) {
     }
     LOG("Invoking app->shutdown()...");
     app->shutdown();
-    LOG("=== NXtify UI Terminated Cleanly ===");
+    LOG("=== SpotiBacán UI Terminated Cleanly ===");
     logClose();
     return 0;
 }

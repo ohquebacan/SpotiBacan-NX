@@ -2,6 +2,7 @@
  * NXSpotify · view_home.cpp
  * Inicio: Canciones recomendadas y feed de Spotify.
  */
+#include <sys/stat.h>
 #include "app.hpp"
 #include "icons.inc"
 
@@ -25,6 +26,35 @@ void App::drawHome(float x, float y, float w, float h) {
                                 : page.subtitle;
     g.text(sub, { css::Sm }, x + 28, cy + 4, pal.text3, 1, Align::Left, int(w - 56));
     cy += 22 + 16;
+
+    // SpotiBacan (vista Grande): accesos grandes arriba, para llegar con un toque a lo de siempre
+    if (g_bigLayout && page.depth == 0) {
+        struct Tile { const char* key; const char* icon; std::string label; };
+        const Tile tiles[3] = { { "home.liked", ICON_HEART_F, tr("Liked Songs", "Tus me gusta") },
+                                { "home.lists", ICON_LIST, tr("Your playlists", "Tus listas") },
+                                { "home.dl", ICON_DOWNLOAD, tr("Downloaded", "Descargadas") } };
+        const float tg = 12, tw = (w - 56 - tg * 2) / 3, th = 72;
+        for (int i = 0; i < 3; ++i) {
+            const float tx = x + 28 + i * (tw + tg);
+            const Id id = uid(tiles[i].key);
+            const bool hit = ui.item(id, { tx, cy, tw, th }, 16);
+            const bool hot = ui.pressed(id) || (ui.focused(id) && ui.showFocusRing());
+            g.roundRect(tx, cy, tw, th, 16, pal.text, hot ? 0.13f : 0.07f);
+            g.roundRect(tx, cy, th, th, 16, pal.accent, 0.22f);
+            g.icon(tiles[i].icon, tx + th / 2, cy + th / 2, 28, pal.accentInk);
+            g.textC(tiles[i].label, { css::Md, Weight::SemiBold }, tx + th + 16, cy + th / 2, pal.text, 1, Align::Left, int(tw - th - 24));
+            if (hit) {
+                if (i == 0) navigate(View::List, -1);
+                else if (i == 1) navigate(View::Playlists);
+                else {
+                    mkdir("sdmc:/music", 0777);
+                    mkdir("sdmc:/music/SpotiBacan", 0777);
+                    navigate(View::Files, -1, "sdmc:/music/SpotiBacan");
+                }
+            }
+        }
+        cy += th + 22;
+    }
 
     if (page.depth > 0) {
         bool backClicked = false;
@@ -53,7 +83,7 @@ void App::drawHome(float x, float y, float w, float h) {
         if (refreshClicked) bg.browseHome();
         cy += 140;
     } else {
-        const float rowH = 56.f;
+        const float rowH = g_bigLayout ? 66.f : 56.f;
         const float rw = w - 56;
         for (size_t i = 0; i < page.items.size(); ++i) {
             const auto& item = page.items[i];

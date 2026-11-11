@@ -102,9 +102,9 @@ std::string fetchOnlineLyrics(const std::string& artist, const std::string& titl
     snprintf(hex, sizeof(hex), "%016llx", static_cast<unsigned long long>(hash));
 
     mkdir("sdmc:/config", 0777);
-    mkdir("sdmc:/config/NXtify", 0777);
-    mkdir("sdmc:/config/NXtify/lyrics-cache", 0777);
-    std::string cachePath = std::string("sdmc:/config/NXtify/lyrics-cache/") + hex + ".lrc";
+    mkdir("sdmc:/config/SpotiBacan", 0777);
+    mkdir("sdmc:/config/SpotiBacan/lyrics-cache", 0777);
+    std::string cachePath = std::string("sdmc:/config/SpotiBacan/lyrics-cache/") + hex + ".lrc";
 
     if (FILE* f = fopen(cachePath.c_str(), "rb")) {
         char buf[8192];
@@ -269,9 +269,9 @@ void TrackLoader::work(const Request& r, Result& out) {
             char hex[17] = {};
             snprintf(hex, sizeof(hex), "%016llx", static_cast<unsigned long long>(hash));
             mkdir("sdmc:/config", 0777);
-            mkdir("sdmc:/config/NXtify", 0777);
-            mkdir("sdmc:/config/NXtify/artwork-cache", 0777);
-            localFile = std::string("sdmc:/config/NXtify/artwork-cache/") + hex + ".img";
+            mkdir("sdmc:/config/SpotiBacan", 0777);
+            mkdir("sdmc:/config/SpotiBacan/artwork-cache", 0777);
+            localFile = std::string("sdmc:/config/SpotiBacan/artwork-cache/") + hex + ".img";
             FILE* test = fopen(localFile.c_str(), "rb");
             if (!test) {
                 std::string err;

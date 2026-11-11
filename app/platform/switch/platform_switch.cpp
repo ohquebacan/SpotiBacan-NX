@@ -455,8 +455,8 @@ std::vector<FontData> systemFonts() {
 }
 
 const char* configParent() { return "sdmc:/config"; }
-const char* configDir() { return "sdmc:/config/NXtify"; }
-const char* backupDir() { return "sdmc:/config/NXtify-backups"; }
+const char* configDir() { return "sdmc:/config/SpotiBacan"; }
+const char* backupDir() { return "sdmc:/config/SpotiBacan-backups"; }
 const char* root() { return "sdmc:/"; }
 const char* rootName() { return "the SD card"; }
 bool isRoot(const std::string& path) { return path.empty() || path == "sdmc:/" || path == "sdmc:"; }

@@ -1,3 +1,4 @@
+#include "spotibacan_migrate.hpp"
 #include "background_backend.hpp"
 #include "ipc_self_test.hpp"
 #include "switify_service.hpp"
@@ -92,16 +93,17 @@ void __appExit(void) {
 }  // extern "C"
 
 int main(int, char**) {
+  spotibacanMigrateConfig("sdmc:");
   mkdir("/config", 0755);
-  mkdir("/config/NXtify", 0755);
+  mkdir("/config/SpotiBacan", 0755);
   nxlog::installBellLogger();
-  nxlog::setLogFile("/config/NXtify/background.log", 512 * 1024);
+  nxlog::setLogFile("/config/SpotiBacan/background.log", 512 * 1024);
   nxlog::setQueueEnabled(false);
 #ifdef SWITIFY_LIGHTWEIGHT_OVERLAY
   nxlog::push(
-      "NXtify Phase 2 background engine 0.5.0-lite1 starting");
+      "SpotiBacán Phase 2 background engine 0.5.0-lite1 starting");
 #else
-  nxlog::push("NXtify Phase 2 background engine 0.5.0 starting");
+  nxlog::push("SpotiBacán Phase 2 background engine 0.5.0 starting");
 #endif
   nxlog::push("Compatibility profile: Applet pool, lazy audout, 2 BSD sessions (bsd:u)");
   nxlog::push("Network profile: TCP-only; UDP disabled");
@@ -128,7 +130,7 @@ int main(int, char**) {
   if (R_SUCCEEDED(socketInitResult)) {
     if (backend->start()) {
       backendStarted.store(true);
-      nxlog::pushHeapUsage("NXtify backend started");
+      nxlog::pushHeapUsage("SpotiBacán backend started");
     }
   }
 
@@ -151,11 +153,11 @@ int main(int, char**) {
       }
       if (backend->start()) {
         backendStarted.store(true);
-        nxlog::pushHeapUsage("NXtify backend started");
+        nxlog::pushHeapUsage("SpotiBacán backend started");
         break;
       } else {
         core->publishServiceState(SwitifyServiceState_Connecting, 0);
-        core->publishTrack({}, {}, "Conectando a NXtify...", 0);
+        core->publishTrack({}, {}, "Conectando a SpotiBacán...", 0);
         for (int i = 0; i < 20 && supervisorRunning.load(); ++i) {
           svcSleepThread(100000000ULL);
         }

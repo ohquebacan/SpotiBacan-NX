@@ -8,7 +8,7 @@ namespace switify::phase2::ipc_self_test {
 namespace {
 
 constexpr const char* ResultPath =
-    "sdmc:/config/NXtify/background-ready.log";
+    "sdmc:/config/SpotiBacan/background-ready.log";
 
 alignas(0x1000) uint8_t threadStack[0x4000];
 Thread thread{};
