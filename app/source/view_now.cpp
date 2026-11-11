@@ -79,7 +79,7 @@ void App::drawNow(float x, float y, float w, float h) {
     // (drawPaletteTab's height) are enough, and the bars keep their height rather than shrinking to a sliver.
     const float paletteH = 8 + 26 + 10 + 4 * 30 + 8 + 20;
     const float wantPanel = title.size() > 1 ? std::max(8 + 3 * 52.f, paletteH) : 8 + 4 * 52;
-    const float vizH = store.showSpectrum ? clampf(avail - fixedH(0) - 14 - wantPanel, 28, 46) : 0;
+    const float vizH = 0;   // SpotiBacan: sin ecualizador (store.showSpectrum ya no se usa)
     const float panelH = std::max(96.f, avail - fixedH(vizH));
     float cy = y + padT;
 

@@ -1095,7 +1095,7 @@ void App::update() {
     // SpotiBacan: solo si se ve (Sonando o el Canvas). Antes corria en cada cuadro en cualquier pantalla y, con el
     // servicio de fondo, la senal se inventaba sumando 28 senos x 4096 muestras + una FFT de 4096 en el hilo de la
     // interfaz: era de lo que mas trababa la navegacion.
-    const bool specSeen = canvas || route.view == View::Now;
+    const bool specSeen = canvas;   // SpotiBacan: sin ecualizador en Sonando (lo pidio Emilio, y pesa)
     if (specSeen && isPlaying() && player.latestPcm(pcm_.data(), Spectrum::N)) spec.feed(pcm_.data(), player.sampleRate());
     if (specSeen) spec.step(dt, isPlaying());
     // The cover's bass pulse (Now playing, and the Canvas when asked for), eased so a kick swells rather than pops.
@@ -2918,21 +2918,26 @@ void App::bgUpdate() {
             }
             std::vector<std::string> plTracks;
             plTracks.reserve(items.size());
+            // SpotiBacan: con indice (antes, la biblioteca entera recorrida por cada cancion)
+            std::unordered_map<std::string, int> byPath, byName;
+            byPath.reserve(lib.tracks.size() * 2);
+            byName.reserve(lib.tracks.size() * 2);
+            for (size_t i = 0; i < lib.tracks.size(); ++i) {
+                byPath.emplace(lib.tracks[i].path, int(i));
+                byName.emplace(lib.tracks[i].title + '\x1f' + lib.tracks[i].artist, int(i));
+            }
             for (auto& nt : items) {
                 if (nt.title.empty()) continue;
                 nt.tagged = true;
                 int found = -1;
-                for (size_t i = 0; i < lib.tracks.size(); ++i) {
-                    if (lib.tracks[i].path == nt.path ||
-                        (lib.tracks[i].title == nt.title && lib.tracks[i].artist == nt.artist)) {
-                        found = int(i);
-                        break;
-                    }
-                }
+                if (auto it = byPath.find(nt.path); it != byPath.end()) found = it->second;
+                else if (auto jt = byName.find(nt.title + '\x1f' + nt.artist); jt != byName.end()) found = jt->second;
                 if (found >= 0) {
                     plTracks.push_back(lib.tracks[found].path);
                 } else {
                     plTracks.push_back(nt.path);
+                    byPath.emplace(nt.path, int(lib.tracks.size()));
+                    byName.emplace(nt.title + '\x1f' + nt.artist, int(lib.tracks.size()));
                     lib.tracks.push_back(std::move(nt));
                 }
             }
@@ -2944,9 +2949,7 @@ void App::bgUpdate() {
                 }
             }
             rebuildIndex();
-            saveSpotifyLibrary();
-            store.save();
-            store.saveCovers();
+            syncSavePending_ = true;   // se escribe con lo de la sincronizacion (al terminar o cada 30 s)
             meta.syncLibrary(&lib, store.path("tags.tsv"));
             LOG("App::frame: applied on-demand fetch for playlist '%s' (%zu tracks)",
                 store.playlists[readyPlRef].name.c_str(), store.playlists[readyPlRef].tracks.size());
@@ -2968,6 +2971,15 @@ void App::bgUpdate() {
                 store.covers[k] = v;
                 dirty = true;
             }
+        }
+        // SpotiBacan: indice de la biblioteca una vez por pasada. Antes, por cada cancion de cada lista se recorria la
+        // biblioteca entera (500 x 9565 comparaciones de texto por lista): cada lista sincronizada congelaba ~2,3 s.
+        std::unordered_map<std::string, int> byPath, byName;
+        byPath.reserve(lib.tracks.size() * 2);
+        byName.reserve(lib.tracks.size() * 2);
+        for (size_t i = 0; i < lib.tracks.size(); ++i) {
+            byPath.emplace(lib.tracks[i].path, int(i));
+            byName.emplace(lib.tracks[i].title + '\x1f' + lib.tracks[i].artist, int(i));
         }
         for (auto& spd : syncData) {
             int pIdx = -1;
@@ -3002,13 +3014,8 @@ void App::bgUpdate() {
                     if (nt.title.empty()) continue;
                     nt.tagged = true;
                     int found = -1;
-                    for (size_t i = 0; i < lib.tracks.size(); ++i) {
-                        if (lib.tracks[i].path == nt.path ||
-                            (lib.tracks[i].title == nt.title && lib.tracks[i].artist == nt.artist)) {
-                            found = int(i);
-                            break;
-                        }
-                    }
+                    if (auto it = byPath.find(nt.path); it != byPath.end()) found = it->second;
+                    else if (auto jt = byName.find(nt.title + '\x1f' + nt.artist); jt != byName.end()) found = jt->second;
                     if (found >= 0) {
                         plTracks.push_back(lib.tracks[found].path);
                         if (spd.name == "Tus me gusta") store.liked.push_back(lib.tracks[found].path);
@@ -3016,6 +3023,8 @@ void App::bgUpdate() {
                         std::string tPath = nt.path;
                         plTracks.push_back(tPath);
                         if (spd.name == "Tus me gusta") store.liked.push_back(tPath);
+                        byPath.emplace(nt.path, int(lib.tracks.size()));
+                        byName.emplace(nt.title + '\x1f' + nt.artist, int(lib.tracks.size()));
                         lib.tracks.push_back(std::move(nt));
                         dirty = true;
                     }
@@ -3026,14 +3035,19 @@ void App::bgUpdate() {
         }
         if (dirty) {
             rebuildIndex();
-            saveSpotifyLibrary();
-            store.save();
-            store.saveCovers();
+            syncSavePending_ = true;
             LOG("SpotifySync: direct sync applied, total library tracks = %zu", lib.tracks.size());
+            if (!lib.tracks.empty()) meta.syncLibrary(&lib, store.path("tags.tsv"));
         }
-        if (!lib.tracks.empty()) {
-            meta.syncLibrary(&lib, store.path("tags.tsv"));
-        }
+    }
+    // SpotiBacan: lo pesado (biblioteca ~1 MB, caratulas ~1 MB, ajustes) se escribe al terminar la sincronizacion o, a
+    // lo sumo, cada 30 s mientras sigue; antes se escribia entero por cada lista que llegaba.
+    if (syncSavePending_ && (spotifySyncDone_.load() || time - syncSavedAt_ > 30)) {
+        syncSavePending_ = false;
+        syncSavedAt_ = time;
+        saveSpotifyLibrary();
+        store.save();
+        store.saveCovers();
     }
 }
 

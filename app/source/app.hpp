@@ -1168,7 +1168,9 @@ private:
     void confirmLogoutSpotify();
     void logoutSpotify();
     void drawSpotifyLoginScreen();
-    void drawRail();   // SpotiBacan: barra lateral como riel de iconos grandes con su nombre
+    void drawRail();
+    bool syncSavePending_ = false;   // SpotiBacan: guardar lo sincronizado sin hacerlo por cada lista
+    double syncSavedAt_ = 0;   // SpotiBacan: barra lateral como riel de iconos grandes con su nombre
     mutable std::mutex coversMutex_;
     std::atomic<bool> spotifySyncQuit_{ false };
     bool supportAsked_ = false;

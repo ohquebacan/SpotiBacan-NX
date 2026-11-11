@@ -642,9 +642,7 @@ void App::drawSettings(float x, float y, float w, float h) {
         sections.push_back(
             { tr("Visualizer", "Visualizador"), ICON_WAVE,
               { { tr("Spectrum", "Espectro"),
-                  { toggleRow(tr("Spectrum on Now playing", "Espectro en Esta sonando"), tr("The Canvas turns its progress line into the same bars when idle", "El Canvas convierte su barra de progreso en estas mismas barras al estar inactivo"), "set.spec",
-                              store.showSpectrum),
-                    sliderRow(tr("Sensitivity", "Sensibilidad"), pct(store.vizSensitivity), tr("Higher for quiet recordings, lower if the bars hit the top", "Mas alto para canciones suaves, mas bajo si las barras tocan el tope"),
+                  { sliderRow(tr("Sensitivity", "Sensibilidad"), pct(store.vizSensitivity), tr("Higher for quiet recordings, lower if the bars hit the top", "Mas alto para canciones suaves, mas bajo si las barras tocan el tope"),
                               "set.vsens", store.vizSensitivity),
                     sliderRow(tr("Smoothing", "Suavizado"), pct(store.vizSmoothing), tr("Higher is calmer, lower follows every hit", "Mas alto es mas suave, mas bajo sigue cada golpe"), "set.vsmooth",
                               store.vizSmoothing),
