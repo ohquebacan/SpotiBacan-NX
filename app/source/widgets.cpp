@@ -31,11 +31,11 @@ bool App::iconButton(Id id, const char* icon, float cx, float cy, bool on, float
 
 float App::button(Id id, const char* icon, const std::string& label, float x, float y, bool primary, bool* clicked, bool toggled, bool danger,
                   uint8_t flags, float minW) {
-    const Font f{ css::Sm, Weight::SemiBold };
-    const float iconW = icon ? 16 + 8 : 0;
-    const float natural = 16 + iconW + g.measure(label, f) + 16;
+    const Font f{ g_bigLayout ? css::Base : css::Sm, Weight::SemiBold };
+    const float iconW = icon ? (g_bigLayout ? 20.f : 16.f) + 8 : 0;
+    const float natural = (g_bigLayout ? 20.f : 16.f) + iconW + g.measure(label, f) + (g_bigLayout ? 20.f : 16.f);
     const float w = std::max(natural, minW);   // a column of buttons one width (Settings › Reset)
-    const float h = g_bigLayout ? 38.f : 34.f;   // SpotiBacan: mas alto en la vista Grande
+    const float h = css::BtnH;   // SpotiBacan: 44 en la vista Grande
     const SDL_FRect r{ x, y, w, h };
     const bool hit = ui.item(id, r, h / 2, flags);
     if (clicked) *clicked = hit;
@@ -58,8 +58,9 @@ float App::button(Id id, const char* icon, const std::string& label, float x, fl
         g.roundStroke(x, y, w, h, h / 2, 1, pal.text, 0.15f);
         if (danger) fg = dangerInk();
     }
-    float tx = x + 16 + (w - natural) / 2;
-    if (icon) { g.icon(icon, tx + 8, y + h / 2, 16, fg); tx += iconW; }
+    const float side = g_bigLayout ? 20.f : 16.f, isz = g_bigLayout ? 20.f : 16.f;
+    float tx = x + side + (w - natural) / 2;
+    if (icon) { g.icon(icon, tx + isz / 2, y + h / 2, isz, fg); tx += iconW; }
     g.textC(label, f, tx, y + h / 2, fg);
     return w;
 }

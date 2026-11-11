@@ -128,7 +128,7 @@ void App::drawTrackList(float x, float y, float w, float h) {
     g.text(title, { css::Xxl, Weight::Bold }, tx, cyTop + 16, pal.text, 1, Align::Left, int(tw));
     g.text(sub, { css::Sm }, tx, cyTop + 58, pal.text3, 1, Align::Left, int(tw));
     float bx = tx;
-    const float by = cyTop + 120 - 34;
+    const float by = cyTop + 120 - css::BtnH;
     bool clicked = false;
     // The page's playlist, as it was when the frame began: Export and Open folder go to another page part way through
     // (route.ref is then the picker's −1 or a folder's index), and the buttons after them read the playlist again
@@ -163,12 +163,12 @@ void App::drawTrackList(float x, float y, float w, float h) {
         }
         const Id id = uid(key);
         hint(id, label);   // round with its icon only: its name when focused (App::drawHint)
-        const bool c = ui.item(id, { bx, by, 34, 34 }, 17);
+        const bool c = ui.item(id, { bx, by, css::BtnH, css::BtnH }, css::BtnH / 2);
         const bool hot = ui.pressed(id) || (ui.focused(id) && ui.showFocusRing());
-        g.roundRect(bx, by, 34, 34, 17, toggled ? pal.accent : pal.text, toggled ? 0.18f : hot ? 0.11f : 0.065f);
-        g.roundStroke(bx, by, 34, 34, 17, 1, toggled ? pal.accent : pal.text, toggled ? 0.5f : 0.15f);
-        g.icon(icon, bx + 17, by + 17, 16, danger ? dangerInk() : toggled ? pal.accentInk : pal.text);
-        bx += 34 + 8;
+        g.roundRect(bx, by, css::BtnH, css::BtnH, css::BtnH / 2, toggled ? pal.accent : pal.text, toggled ? 0.18f : hot ? 0.11f : 0.065f);
+        g.roundStroke(bx, by, css::BtnH, css::BtnH, css::BtnH / 2, 1, toggled ? pal.accent : pal.text, toggled ? 0.5f : 0.15f);
+        g.icon(icon, bx + css::BtnH / 2, by + css::BtnH / 2, 16, danger ? dangerInk() : toggled ? pal.accentInk : pal.text);
+        bx += css::BtnH + 8;
         return c;
     };
     bx += button(uid("pl.play"), ICON_PLAY, tr("Play", "Reproducir"), bx, by, true, &clicked, false, false, DefaultFocus) + 8;
@@ -200,7 +200,7 @@ void App::drawTrackList(float x, float y, float w, float h) {
     // the four views, right of the actions (.pl-modes)
     {
         int m = int(mode);
-        viewSwitch("pl.view", x + w - 28, by + 17, m, mixable ? 1u << int(ListMode::Grid) : 0u);
+        viewSwitch("pl.view", x + w - 28, by + css::BtnH / 2, m, mixable ? 1u << int(ListMode::Grid) : 0u);
         if (m != int(mode)) store.viewPlaylist = m;
     }
 

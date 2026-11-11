@@ -158,5 +158,8 @@ private:
     std::string artist_;
     std::string album_;
     std::string artworkUrl_;
+    // SpotiBacan: tras un cambio de cancion, el servicio puede tardar en anotar la caratula nueva: se vuelve a mirar
+    double artRecheckUntil_ = 0, artNextAt_ = 0;
+    std::string artUrlAtChange_;
     std::string artworkCachePath_;
 };

@@ -46,11 +46,7 @@ void App::drawHome(float x, float y, float w, float h) {
             if (hit) {
                 if (i == 0) navigate(View::List, -1);
                 else if (i == 1) navigate(View::Playlists);
-                else {
-                    mkdir("sdmc:/music", 0777);
-                    mkdir("sdmc:/music/SpotiBacan", 0777);
-                    navigate(View::Files, -1, "sdmc:/music/SpotiBacan");
-                }
+                else navigate(View::Downloads);
             }
         }
         cy += th + 22;

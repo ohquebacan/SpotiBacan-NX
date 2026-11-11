@@ -92,6 +92,7 @@ void App::draw() {
     case View::Settings: drawSettings(mx, my, mw, mh); break;
     case View::Files: drawFiles(mx, my, mw, mh); break;
     case View::Playlists: drawPlaylists(mx, my, mw, mh); break;
+    case View::Downloads: drawDownloads(mx, my, mw, mh); break;
     case View::PickFolder:
         if (folderFor >= 0 && route.view != View::PickFolder) folderFor = -1;
         [[fallthrough]];
@@ -862,11 +863,7 @@ void App::drawPlayerbar() {
             x -= 8;
             return hit;
         };
-        auto openDownloads = [this] {
-            mkdir("sdmc:/music", 0777);
-            mkdir("sdmc:/music/SpotiBacan", 0777);
-            navigate(View::Files, -1, "sdmc:/music/SpotiBacan");
-        };
+        auto openDownloads = [this] { navigate(View::Downloads); };
         if (pill("pb.canvas", ICON_CANVAS, "", false)) openCanvas(true);   // (tambien con -)
         // el temporizador
         const double sl = sleepLeft();
@@ -1179,12 +1176,7 @@ void App::drawRail() {
     if (item("rail.lists", ICON_LIST, tr("Playlists", "Listas"), v == View::Playlists || v == View::List)) navigate(View::Playlists);
     if (item("rail.albums", ICON_V_GRID, tr("Albums", "Albumes"), v == View::Albums || v == View::Album)) { libFrom = View::Albums; navigate(View::Albums); }
     if (item("rail.artists", ICON_MIC, tr("Artists", "Artistas"), v == View::Artists || v == View::Artist)) navigate(View::Artists);
-    const std::string dl = "sdmc:/music/SpotiBacan";
-    if (item("rail.dl", ICON_DOWNLOAD, tr("Downloads", "Descargas"), v == View::Files && route.query.rfind(dl, 0) == 0)) {
-        mkdir("sdmc:/music", 0777);
-        mkdir(dl.c_str(), 0777);
-        navigate(View::Files, -1, dl);
-    }
+    if (item("rail.dl", ICON_DOWNLOAD, tr("Downloads", "Descargas"), v == View::Downloads)) navigate(View::Downloads);
     y = css::H - css::BarH - 12 - h;
     if (item("rail.settings", ICON_GEAR, tr("Settings", "Ajustes"), v == View::Settings)) navigate(View::Settings);
 }

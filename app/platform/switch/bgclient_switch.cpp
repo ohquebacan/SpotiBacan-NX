@@ -181,7 +181,16 @@ bool BgClient::poll(double) {
         artist_ = s.artist;
         album_ = s.album;
         st_.trackGen++;
+        artUrlAtChange_ = artworkUrl_;
+        artRecheckUntil_ = now + 8.0;
+        artNextAt_ = now + 0.4;
         checkArtwork();
+        if (artworkUrl_ != artUrlAtChange_) artRecheckUntil_ = 0;
+    } else if (now < artRecheckUntil_ && now >= artNextAt_) {
+        // la caratula de la cancion nueva todavia no estaba: cada 0,4 s hasta 8 s, hasta que cambie
+        artNextAt_ = now + 0.4;
+        checkArtwork();
+        if (artworkUrl_ != artUrlAtChange_) artRecheckUntil_ = 0;
     } else if (artworkCachePath_.empty()) {
         static double s_artAt = -10;
         if (now - s_artAt > 2.0) { s_artAt = now; checkArtwork(); }

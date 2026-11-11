@@ -47,17 +47,18 @@ constexpr float TbH = 46, SideW = 236, SideWCollapsed = 68, RailW = 88;
 // --fs-* scale, one pixel up from the desktop values for a handheld screen. SpotiBacan: variables, para que la vista
 // Grande agrande de verdad las letras y la barra de reproduccion (applyLayout); la Clasica usa los valores de siempre.
 inline float BarH = 92;
+inline float BtnH = 34;   // SpotiBacan: alto de los botones (44 en la vista Grande, como el mockup)
 inline int Xs = 12, Sm = 13, Base = 15, Md = 16, Lg = 19, Xl = 25, Xxl = 34, Hero = 52;
 inline void applyLayout(bool big) {
-    if (big) { BarH = 104; Xs = 14; Sm = 15; Base = 18; Md = 19; Lg = 22; Xl = 28; Xxl = 38; Hero = 56; }
-    else     { BarH = 92;  Xs = 12; Sm = 13; Base = 15; Md = 16; Lg = 19; Xl = 25; Xxl = 34; Hero = 52; }
+    if (big) { BtnH = 44; BarH = 104; Xs = 14; Sm = 15; Base = 18; Md = 19; Lg = 22; Xl = 28; Xxl = 38; Hero = 56; }
+    else     { BtnH = 34; BarH = 92;  Xs = 12; Sm = 13; Base = 15; Md = 16; Lg = 19; Xl = 25; Xxl = 34; Hero = 52; }
 }
 }  // namespace css
 
 struct TourStep;   // tour.cpp
 
 enum class View { Now, Home, Queue, Artists, Artist, Library, Album, List, Search, Settings, PickFolder, Albums, PickPlaylist, PickExport,
-                  Files, Playlists };
+                  Files, Playlists, Downloads };   // SpotiBacan: Downloads, lo guardado en la SD como lista
 
 /** Gatefold 1.4.2's four list views (.pl-modes): by album, with covers, as tiles, as a plain list. */
 enum class ListMode { Albums = 0, Covers = 1, Grid = 2, List = 3 };
@@ -1169,6 +1170,10 @@ private:
     void logoutSpotify();
     void drawSpotifyLoginScreen();
     void drawRail();
+    void drawDownloads(float x, float y, float w, float h);   // SpotiBacan: la cola y lo guardado, como una lista
+    std::vector<int> downloadedTracks();                      // indices en lib de lo guardado (los agrega si faltan)
+    bool localPlayback_ = false;                              // SpotiBacan: sonando desde la SD, sin el servicio de fondo
+    void playLocal(const std::vector<int>& tracks, int start, bool shuffle);
     void rowDownload(int track, float cx, float cy);   // SpotiBacan: ✓ o boton de descarga junto a una cancion
     bool syncSavePending_ = false;   // SpotiBacan: guardar lo sincronizado sin hacerlo por cada lista
     double syncSavedAt_ = 0;   // SpotiBacan: barra lateral como riel de iconos grandes con su nombre

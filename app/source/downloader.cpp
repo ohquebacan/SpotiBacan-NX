@@ -20,6 +20,7 @@
 #include <dirent.h>
 #include <strings.h>
 
+#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
@@ -172,7 +173,7 @@ void walk(const std::string& dir, std::unordered_set<std::string>& out, int dept
         if (n == "." || n == "..") continue;
         const std::string full = dir + "/" + n;
         if (e->d_type == DT_DIR) walk(full, out, depth + 1);
-        else if (n.size() > 4 && strcasecmp(n.c_str() + n.size() - 4, ".ogg") == 0) out.insert(lower(full));
+        else if (n.size() > 4 && strcasecmp(n.c_str() + n.size() - 4, ".ogg") == 0) out.insert(full);
     }
     closedir(d);
 }
@@ -185,7 +186,7 @@ bool Downloader::isDownloaded(const DlJob& j) {
             walk(ROOT, found, 0);
             {
                 std::scoped_lock l(savedM_);
-                saved_.insert(found.begin(), found.end());
+                for (const auto& f : found) { saved_.insert(lower(f)); savedReal_.insert(f); }
             }
             ++gen_;
         });
@@ -195,10 +196,29 @@ bool Downloader::isDownloaded(const DlJob& j) {
     return saved_.count(p) != 0;
 }
 
+std::vector<std::string> Downloader::savedList() {
+    isDownloaded(DlJob{});   // arranca la lectura de la carpeta si no estaba
+    std::vector<std::string> out;
+    {
+        std::scoped_lock l(savedM_);
+        out.reserve(savedReal_.size());
+        for (const auto& p : savedReal_) out.push_back(p);
+    }
+    std::sort(out.begin(), out.end(), [](const std::string& a, const std::string& b) { return strcasecmp(a.c_str(), b.c_str()) < 0; });
+    return out;
+}
+
+void Downloader::queueSnapshot(DlJob& current, std::vector<DlJob>& pending) {
+    std::scoped_lock l(m_);
+    current = st_.current.empty() ? DlJob{} : current_;
+    pending.assign(queue_.begin(), queue_.end());
+}
+
 void Downloader::markSaved(const std::string& path) {
     {
         std::scoped_lock l(savedM_);
         saved_.insert(lower(path));
+        savedReal_.insert(path);
     }
     ++gen_;
 }
@@ -463,6 +483,7 @@ void Downloader::run() {
             }
             j = queue_.front();
             queue_.pop_front();
+            current_ = j;
             st_.pending = int(queue_.size());
             st_.current = j.title;
             st_.active = true;

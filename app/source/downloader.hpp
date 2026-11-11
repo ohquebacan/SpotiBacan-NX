@@ -18,6 +18,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <set>
 #include <unordered_set>
 #include <vector>
 
@@ -56,6 +57,10 @@ public:
     bool isDownloaded(const DlJob& j);
     /** Sube cada vez que cambia lo que hay en la SD (termino de leerla o se guardo una cancion): para recalcular. */
     uint64_t generation() const { return gen_.load(); }
+    /** Lo guardado en la SD (rutas sdmc:/music/SpotiBacan/...), ordenado. */
+    std::vector<std::string> savedList();
+    /** La cola: la que baja ahora (vacia si ninguna) y las que esperan. */
+    void queueSnapshot(DlJob& current, std::vector<DlJob>& pending);
 
 private:
     Downloader() = default;
@@ -69,6 +74,7 @@ private:
     std::mutex m_;
     std::condition_variable cv_;
     std::deque<DlJob> queue_;
+    DlJob current_;
     std::thread worker_, packets_;
     std::atomic<bool> quit_{ false }, cancelCurrent_{ false }, sessionUp_{ false };
     std::shared_ptr<cspot::Context> ctx_;
@@ -76,6 +82,7 @@ private:
     std::atomic<int64_t> got_{ 0 }, total_{ 0 };
     std::mutex savedM_;
     std::unordered_set<std::string> saved_;   // rutas en minusculas (FAT no distingue)
+    std::set<std::string> savedReal_;         // las mismas, tal como estan en la SD
     std::atomic<bool> scanStarted_{ false };
     std::atomic<uint64_t> gen_{ 0 };
     std::thread scan_;

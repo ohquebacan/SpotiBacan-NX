@@ -150,6 +150,12 @@ bool App::init() {
 #ifndef GF_WINDOWED
     store.load();
     css::applyLayout(store.bigLayout);
+    {   // SpotiBacan: caratulas «trabadas» de versiones anteriores (canciones adoptadas del servicio con la caratula de la
+        // cancion anterior): se olvidan y se vuelven a pedir
+        std::scoped_lock lock(coversMutex_);
+        for (auto it = store.covers.begin(); it != store.covers.end();)
+            it = it->first.rfind("spotify:track:remote:", 0) == 0 || it->first == "spotify:track:current" ? store.covers.erase(it) : std::next(it);
+    }
 #endif
     // After a factory reset: its old settings folder, moved aside at exit, is deleted in the background
     if (struct stat st; stat((std::string(Store::Dir) + ".erased").c_str(), &st) == 0)
@@ -1334,6 +1340,13 @@ void App::playTracks(const std::vector<int>& tracks, int startPos, const std::st
     LOG("App::playTracks: %zu tracks, startPos=%d, name='%s', shuffle=%d",
         tracks.size(), startPos, name.c_str(), int(shuffle));
     if (tracks.empty()) return;
+    // SpotiBacan: algo de Spotify despues de escuchar lo descargado: se deja la SD y se vuelve al servicio de fondo
+    if (localPlayback_ && tracks.front() >= 0 && tracks.front() < int(lib.tracks.size()) &&
+        lib.tracks[tracks.front()].path.rfind("spotify:", 0) == 0) {
+        localPlayback_ = false;
+        player.stop();
+        bgConnect();
+    }
     grabDrop();   // a new queue: the row held belonged to the old one
     q.tracks = tracks;
     q.name = name;
@@ -2715,10 +2728,8 @@ bool App::bgAdoptQueue() {
             nt.trackNo = int(lib.tracks.size() + 1);
             nt.path = "spotify:track:remote:" + std::to_string(lib.tracks.size());
             nt.tagged = true;
-            if (!bg.artworkUrl().empty()) {
-                std::scoped_lock lock(coversMutex_);
-                store.covers[nt.path] = bg.artworkUrl();
-            }
+            // SpotiBacan: la caratula no se fija aqui: en este momento el servicio puede tener todavia la de la cancion
+            // anterior, y quedaba guardada para siempre (la caratula «trabada»). La pone bgUpdate cuando cambia.
             lib.tracks.push_back(nt);
             if (!store.playlists.empty()) {
                 store.playlists[0].tracks.push_back(nt.path);
@@ -2805,6 +2816,7 @@ void App::bgUpdate() {
     }
     if (!player.remote()) {
         static double lastTry = 0;
+        if (localPlayback_) return;   // SpotiBacan: suena desde la SD; se vuelve al servicio al tocar algo de Spotify
         if (store.background && (time - lastTry > 1.5 || lastTry == 0)) {
             lastTry = time;
             if (bg.connect()) {
@@ -2841,6 +2853,16 @@ void App::bgUpdate() {
     }
     const std::string covPath = bg.artworkCachePath();
     const std::string covUrl = bg.artworkUrl();
+    // SpotiBacan: una cancion sin caratula propia (adoptada del servicio) se queda con la que el servicio anote ahora
+    if ((!covPath.empty() && covPath != currentCoverCachePath_) || (covPath.empty() && !covUrl.empty() && covUrl != currentCoverUrl_)) {
+        if (now.track >= 0 && now.track < int(lib.tracks.size()) && !covUrl.empty()) {
+            const std::string& p = lib.tracks[now.track].path;
+            if (p.rfind("spotify:track:remote:", 0) == 0 || p == "spotify:track:current") {
+                std::scoped_lock lock(coversMutex_);
+                store.covers[p] = covUrl;
+            }
+        }
+    }
     if (!covPath.empty() && covPath != currentCoverCachePath_) {
         currentCoverCachePath_ = covPath;
         TrackLoader::Request req;
