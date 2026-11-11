@@ -320,7 +320,7 @@ bool BgClient::pcm(float* out, int n) {
     if (!connected_ || st_.status != BgState::Playing || !out || n <= 0) return false;
     const double now = bgClock();
     static double s_lastAt = 0.0;
-    if (now - s_lastAt < 0.05) return false;   // SpotiBacan: 20 por segundo bastan (las barras se deslizan entre medio)
+    if (now - s_lastAt < 0.033) return false;   // SpotiBacan: 30 por segundo, para que se mueva con soltura
     s_lastAt = now;
 
     const double pos = position(now);
@@ -337,36 +337,34 @@ bool BgClient::pcm(float* out, int n) {
     const double snareEnv = std::pow(0.5 + 0.5 * std::cos((beat - 0.5) * twoPi), 4.0);
     const double hatEnv = std::pow(0.5 + 0.5 * std::sin(beat * 2.0 * twoPi), 2.0);
 
-    static constexpr int kBands = 28;
+    // SpotiBacan: senal inventada mas viva. Antes 28 bandas con modulacion lenta: muchas barras del espectro (sobre
+    // todo en el Canvas con puntos LED) caian entre dos bandas y quedaban quietas. Ahora 64 bandas que cubren todo el
+    // ancho, golpes de bombo/caja/platillo con ataque rapido y caida suave, y un poco de ruido propio en cada banda.
+    static constexpr int kBands = 64;
     static double s_phase[kBands] = {};
     static float s_env[kBands] = {};
+    static float s_noise[kBands] = {};
+    static uint32_t s_rng = 0x9e3779b9u;
+    auto rnd = [] { s_rng = s_rng * 1664525u + 1013904223u; return float(s_rng >> 8) / float(1u << 24); };
     double freqs[kBands];
     float amps[kBands];
-
+    const double eighth = std::pow(0.5 + 0.5 * std::cos(beat * 2.0 * twoPi), 6.0);   // platillos en corcheas
     for (int k = 0; k < kBands; ++k) {
         const double frac = double(k) / double(kBands - 1);
         freqs[k] = 45.0 * std::pow(14500.0 / 45.0, frac);
-        const double rate1 = 1.7 + double((seed >> (k % 16)) & 7) * 0.43 + k * 0.19;
-        const double rate2 = 3.1 + double((seed >> ((k + 5) % 16)) & 7) * 0.61 + k * 0.31;
-        const double mod = 0.5 + 0.3 * std::sin(pos * rate1 + k * 1.1) + 0.2 * std::cos(pos * rate2 - k * 0.7);
-
-        float target = 0.004f;
-        if (k < 5) {
-            // Bass & sub-bass
-            target = float((0.025 + 0.22 * kickEnv * (1.0 - k * 0.12)) * (0.65 + 0.35 * mod));
-        } else if (k < 18) {
-            // Mids & vocals/synths
-            const double midPulse = 0.35 * kickEnv + 0.65 * snareEnv;
-            const double bell = std::exp(-std::pow((k - 10.5) / 5.5, 2.0));
-            target = float((0.012 + (0.045 + 0.11 * midPulse) * (0.4 + 0.6 * bell)) * std::max(0.15, mod));
-        } else {
-            // Highs & hi-hats
-            const double decay = 1.0 - (k - 18) * 0.065;
-            target = float((0.005 + 0.065 * (0.6 * hatEnv + 0.4 * snareEnv) * decay) * std::max(0.2, mod));
-        }
-        s_env[k] = s_env[k] * 0.55f + target * 0.45f;
+        s_noise[k] = s_noise[k] * 0.55f + rnd() * 0.45f;
+        const double wobble = 0.5 + 0.5 * std::sin(pos * (2.3 + (seed >> (k % 16) & 7) * 0.5) + k * 0.9);
+        double drive;
+        if (frac < 0.18) drive = 0.75 * kickEnv + 0.25 * s_noise[k];                                   // graves: el bombo
+        else if (frac < 0.62) drive = 0.35 * snareEnv + 0.25 * kickEnv + 0.25 * s_noise[k] + 0.15 * wobble;   // medios
+        else drive = 0.45 * std::max(hatEnv, eighth) + 0.35 * s_noise[k] + 0.2 * snareEnv;             // agudos
+        const double base = 0.30 * (1.0 - 0.55 * frac);
+        const float target = float(base * (0.12 + 0.88 * drive));
+        // ataque rapido, caida suave: se nota cada golpe
+        s_env[k] = target > s_env[k] ? s_env[k] * 0.25f + target * 0.75f : s_env[k] * 0.72f + target * 0.28f;
         amps[k] = s_env[k];
     }
+    (void)snareEnv;
 
     std::memset(out, 0, sizeof(float) * size_t(n));
     const double invSr = twoPi / 48000.0;

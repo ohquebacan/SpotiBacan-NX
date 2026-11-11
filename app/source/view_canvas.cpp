@@ -464,7 +464,7 @@ void App::drawCanvas() {
         // celdas de 20 px con puntos de ~17 px: grandes y casi juntos (los primeros eran chicos y muy separados)
         const float cell = 20;
         const int n = std::max(8, int(pw / cell));
-        const int rows = 8;
+        const int rows = 7;   // (8 chocaba con el nombre del album)
         const float maxH = rows * cell, colW = pw / n, rowH = cell, played = padX + pw * frac;
         const float r = cell * 0.43f;
         const Rgb ramp[4] = { pal.accent2, pal.accent, pal.glow, pal.accentInk };
