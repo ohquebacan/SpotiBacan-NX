@@ -1040,6 +1040,15 @@ void App::update() {
     if (stats.dirty() && time - statsSavedAt > 15) saveStats();
     UPD_MARK("saveStats");
     updateSleep();
+    // SpotiBacan, «Guardar mientras suena»: la cancion de Spotify que suena entra a la cola de descargas (una vez)
+    if (store.autoSave && player.remote() && now.track >= 0 && now.track < int(lib.tracks.size())) {
+        static std::string lastSaved;
+        const Track& t = lib.tracks[now.track];
+        if (t.path != lastSaved && t.path.rfind("spotify:track:", 0) == 0 && t.path.find(':', 14) == std::string::npos) {
+            lastSaved = t.path;
+            Downloader::instance().enqueue({ DlJob{ t.path, t.title, t.albumArtist.empty() ? t.artist : t.albumArtist, t.album, t.trackNo } });
+        }
+    }
     sampleBattery();
     updateLevels();
     updateFileWork();

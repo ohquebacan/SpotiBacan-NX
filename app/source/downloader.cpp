@@ -10,6 +10,7 @@
 #include "logger.hpp"
 #include "net.hpp"
 #include "cores.hpp"
+#include "oggtag.hpp"
 
 #include <curl/curl.h>
 #include <mbedtls/aes.h>
@@ -304,10 +305,12 @@ Downloader::Result Downloader::fetch(const DlJob& j, std::string& err) {
     qt->stepLoadCDNUrl(token);
     std::string url;
     std::vector<uint8_t> key;
+    cspot::TrackInfo info;
     {
         std::scoped_lock l(m);
         if (qt->state != S::READY) { err = "Spotify no dio el enlace del archivo"; return Result::Failed; }
         url = qt->getCdnUrl();
+        info = qt->trackInfo;
         key = qt->getAudioKey();
     }
     if (key.size() != 16) { err = "Clave de audio invalida"; return Result::Failed; }
@@ -360,6 +363,33 @@ Downloader::Result Downloader::fetch(const DlJob& j, std::string& err) {
         if (s.writeFailed || !closed) err = "No se pudo escribir en la tarjeta (probablemente esta llena)";
         else err = "Fallo la descarga (" + std::string(curl_easy_strerror(rc)) + ", HTTP " + std::to_string(status) + ")";
         return Result::Failed;
+    }
+    // Etiquetas y caratula, con los datos de Spotify (los de la lista pueden venir incompletos). Si algo sale mal se
+    // guarda igual, sin etiquetas: el audio ya esta bien.
+    {
+        oggtag::Comments tags;
+        auto pick = [](const std::string& a, const std::string& b) { return a.empty() ? b : a; };
+        tags.emplace_back("TITLE", pick(info.name, j.title));
+        tags.emplace_back("ARTIST", pick(info.artist, j.artist));
+        tags.emplace_back("ALBUM", pick(info.album, j.album));
+        if (j.artist.size()) tags.emplace_back("ALBUMARTIST", j.artist);
+        const int num = info.number ? int(info.number) : j.trackNo;
+        if (num > 0) tags.emplace_back("TRACKNUMBER", std::to_string(num));
+        if (info.discNumber > 0) tags.emplace_back("DISCNUMBER", std::to_string(info.discNumber));
+        tags.emplace_back("SPOTIFY_URI", j.uri);
+        std::vector<uint8_t> jpeg;
+        if (!info.imageUrl.empty()) {
+            std::string body, e;
+            if (net::get(info.imageUrl, body, e) && body.size() > 4 && (uint8_t)body[0] == 0xFF && (uint8_t)body[1] == 0xD8)
+                jpeg.assign(body.begin(), body.end());
+        }
+        const std::string tagged = dst + ".tag";
+        if (oggtag::retag(tmp, tagged, tags, jpeg)) {
+            remove(tmp.c_str());
+            rename(tagged.c_str(), tmp.c_str());
+        } else {
+            LOG("Downloader: no se pudieron escribir las etiquetas de %s; se guarda sin ellas", dst.c_str());
+        }
     }
     remove(dst.c_str());
     if (rename(tmp.c_str(), dst.c_str()) != 0) { remove(tmp.c_str()); err = "No se pudo escribir en la tarjeta"; return Result::Failed; }

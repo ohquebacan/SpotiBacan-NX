@@ -228,6 +228,7 @@ void Store::load() {
         else if (k == "eqCustom") { gfEqParseBands(v.c_str(), this->eq.custom); this->eq.hasCustom = 1; }
         else if (k == "musicRoot") musicRoot = v;
         else if (k == "showHidden") showHidden = v == "1";
+        else if (k == "autoSave") autoSave = v == "1";
         else if (k == "viewPlaylists") viewPlaylists = std::clamp(atoi(v.c_str()), 0, 3);
         else if (k == "tabOrder") {
             // ids that exist, once each; any missing (a tab newer than the file) go at the end in their own order
@@ -441,7 +442,8 @@ void Store::save() const {
     for (size_t i = 0; i < tabOrder.size(); i++) appendf(f, i ? ",%d" : "%d", tabOrder[i]);
     appendf(f, "\ntabLines=1");   // knows placed lines (Store::load)
     appendf(f, "\n");
-    appendf(f, "showHidden=%d\nfilesTab=1\nviewPlaylists=%d\n", showHidden, viewPlaylists);   // filesTab: hiddenTabs already knows the Files tab (bit 6)
+    appendf(f, "showHidden=%d\nfilesTab=1\nviewPlaylists=%d\n", showHidden, viewPlaylists);
+    appendf(f, "autoSave=%d\n", autoSave ? 1 : 0);   // filesTab: hiddenTabs already knows the Files tab (bit 6)
     for (const auto& [k, v] : { std::pair<const char*, const std::string*>{ "filesDir", &filesDir }, { "importDir", &importDir },
                                 { "exportDir", &exportDir }, { "coverDir", &coverDir }, { "backupDir", &backupDir } })
         if (!v->empty()) appendf(f, "%s=%s\n", k, v->c_str());

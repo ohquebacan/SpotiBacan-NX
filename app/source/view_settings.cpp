@@ -486,6 +486,10 @@ void App::drawSettings(float x, float y, float w, float h) {
                                  tr("Use the Tesla overlay (L + D-pad Down + R3) or your linked mobile/PC app to pause, skip tracks and change volume.",
                                     "Usa el overlay de Tesla (L + Cruz abajo + R3) o tu aplicacion vinculada en el telefono o PC para pausar, cambiar de cancion y volumen.")));
 #endif
+        bgRows.push_back(toggleRow(tr("Save while playing", "Guardar mientras suena"),
+                                   tr("Each Spotify song that plays with SpotiBacán open is saved to the SD card, to listen without internet",
+                                      "Cada cancion de Spotify que suena con SpotiBacán abierto se guarda en la SD, para escucharla sin internet"),
+                                   "set.autosave", store.autoSave));
         // Measured: the count beside the label; Stop / Resume while the library is not all measured.
         const size_t measured = std::min(levels.count(), lib.tracks.size());
         const std::string measuredHint =

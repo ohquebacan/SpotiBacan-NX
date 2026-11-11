@@ -149,6 +149,7 @@ struct Store {
     int lang = 1;   // 0 = English, 1 = Español (SpotiBacan: español por defecto)
     std::vector<int> tabOrder = { TabHome, TabNow, TabAlbums, TabArtists };
     bool showHidden = false;   // Files: names starting with a dot
+    bool autoSave = false;     // SpotiBacan: guardar en la SD cada cancion de Spotify que suena
     // Settings → Storage and reset → Folders: where each browser starts (empty: its own default)
     std::string filesDir, importDir, exportDir, coverDir, backupDir;
     // Settings → Updates: 0 off, 1 allowed (default); automatic check at launch
