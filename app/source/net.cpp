@@ -96,13 +96,12 @@ std::string hostOf(const std::string& url) {
 }
 
 bool run(const std::string& url, Sink& sink, std::string& err, const std::string* json = nullptr, const char* secret = nullptr) {
-    // SpotiBacan: el candado solo cubre el arranque de curl. Antes cubria toda la transferencia y cada caratula esperaba
-    // a que terminara cualquier otra descarga (cada handle de curl es independiente, no hace falta serializarlas).
-    {
-        std::lock_guard<std::recursive_mutex> g(gate);
-        std::string e;
-        if (!beginLocked(e)) { err = e; return false; }
-    }
+    // SpotiBacan: el candado vuelve a cubrir toda la transferencia. Soltarlo (varias conexiones TLS a la vez entre
+    // caratulas, metadatos y la sincronizacion) coincidio con que la consola se colgara a los 2-3 s de abrir la app
+    // (11-nov-2026): el servicio ssl de la consola probablemente no aguanta tantas a la vez. No se vuelve a quitar sin probarlo.
+    std::lock_guard<std::recursive_mutex> g(gate);
+    std::string e;
+    if (!beginLocked(e)) { err = e; return false; }
     CURL* c = curl_easy_init();
     if (!c) { err = "The network library did not start"; return false; }
     curl_slist* headers = nullptr;

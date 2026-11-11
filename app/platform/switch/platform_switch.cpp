@@ -170,7 +170,7 @@ bool inFocus() { return appletGetFocusState() == AppletFocusState_InFocus; }
 std::string selfPath(int argc, char** argv) {
     // hbloader gives the .nro's path
     if (argc > 0 && argv[0] && strncmp(argv[0], "sdmc:/", 6) == 0 && strstr(argv[0], ".nro")) return argv[0];
-    return "sdmc:/switch/NXtify/NXtify.nro";
+    return "sdmc:/switch/SpotiBacan/SpotiBacan.nro";   // (abierta desde un acceso del menu HOME: no llega la ruta)
 }
 
 bool swapsSelf() { return true; }
