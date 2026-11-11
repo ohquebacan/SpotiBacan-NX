@@ -19,7 +19,7 @@
 namespace {
 
 #define RowH (g_bigLayout ? 48.f : 40.f)   // SpotiBacan: filas mas altas en la vista Grande
-constexpr float CovRowH = 60;     // .vrow.wc: --rowc 56, + 4
+#define CovRowH (g_bigLayout ? 70.f : 60.f)   // .vrow.wc: --rowc 56, + 4 (SpotiBacan: 70 en la vista Grande)
 constexpr float GroupH = 76;      // .vhead: --head 72, + 4
 constexpr float ColHeadH = 38;    // .list-head 30 + 8 below
 
@@ -204,11 +204,7 @@ bool App::coverRow(Id id, int track, int number, float x, float y, float w, floa
         cx += 64 + gap;
         g.textC(t.genre, { css::Base }, cx, cy, pal.text2, 1, Align::Left, int(fr));
     }
-    {   // SpotiBacan (vista Grande): marca de descargada
-        const bool dl = g_bigLayout && t.path.rfind("spotify:track:", 0) == 0 &&
-                        Downloader::instance().isDownloaded(DlJob{ t.path, t.title, t.albumArtist.empty() ? t.artist : t.albumArtist, t.album, t.trackNo });
-        if (dl) g.icon(ICON_CHECK, x + w - pad - 58, cy, 15, pal.accentInk);
-    }
+    rowDownload(track, x + w - pad - 60, cy);   // SpotiBacan
     g.textC(t.duration > 0 ? fmtTime(t.duration) : "", { css::Sm }, x + w - pad, cy, pal.text3, 1, Align::Right);
     return hit;
 }

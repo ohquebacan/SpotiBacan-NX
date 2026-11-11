@@ -3261,14 +3261,14 @@ void App::drawSpotifyLoginScreen() {
     const float c1 = x0, c2 = x0 + w1 + gap;
     const auto cs = SpotifyApi::instance().codeState();
 
-    // tarjeta 1: con un codigo
+    // tarjeta 1: con un código
     g.roundRect(c1, cy, w1, ch, 20.f, pal.surface, 0.92f);
     g.roundStroke(c1, cy, w1, ch, 20.f, 2.f, green, 0.9f);
-    g.text(tr("With a code", "Con un codigo"), { css::Lg, Weight::Bold }, c1 + 28.f, cy + 24.f, pal.text);
+    g.text(tr("With a code", "Con un código"), { css::Lg, Weight::Bold }, c1 + 28.f, cy + 24.f, pal.text);
     {
         const std::string badge = tr("Recommended", "Recomendado");
         const float bw = float(g.measure(badge, { css::Sm, Weight::SemiBold })) + 24.f;
-        const float bx = c1 + 28.f + float(g.measure(tr("With a code", "Con un codigo"), { css::Lg, Weight::Bold })) + 12.f;
+        const float bx = c1 + 28.f + float(g.measure(tr("With a code", "Con un código"), { css::Lg, Weight::Bold })) + 12.f;
         g.roundRect(bx, cy + 25.f, bw, 26.f, 13.f, green, 0.16f);
         g.textC(badge, { css::Sm, Weight::SemiBold }, bx + bw * 0.5f, cy + 38.f, greenText, 1.f, Align::Center);
     }
@@ -3309,18 +3309,18 @@ void App::drawSpotifyLoginScreen() {
     }
 
     const float tx = qx + qs + 28.f, tw = c1 + w1 - 28.f - tx;
-    g.text(tr("1. Scan it, or go to", "1. Escanealo o entra en"), { css::Base }, tx, qy + 6.f, pal.text2);
+    g.text(tr("1. Scan it, or go to", "1. Escanéalo o entra en"), { css::Base }, tx, qy + 6.f, pal.text2);
     g.text("spotify.com/pair", { css::Xl, Weight::Bold }, tx, qy + 30.f, greenText, 1.f, Align::Left, int(tw));
-    g.text(tr("2. Type this code", "2. Escribe este codigo"), { css::Base }, tx, qy + 86.f, pal.text2);
+    g.text(tr("2. Type this code", "2. Escribe este código"), { css::Base }, tx, qy + 86.f, pal.text2);
     const std::string codeTxt = cs.state == 2 ? cs.userCode : cs.state <= 1 ? "· · ·" : cs.state == 3 || cs.state == 4 ? "OK" : "—";
     g.text(codeTxt, { css::Hero, Weight::ExtraBold }, tx, qy + 108.f, pal.text, 1.f, Align::Left, int(tw));
 
-    // estado + Nuevo codigo
+    // estado + Nuevo código
     const float sy = cy + ch - 84.f;
     std::string st;
     Rgb dot = green;
     switch (cs.state) {
-    case 0: case 1: st = tr("Getting a code…", "Pidiendo un codigo…"); break;
+    case 0: case 1: st = tr("Getting a code…", "Pidiendo un código…"); break;
     case 2: {
         const int left = std::max(0, int(cs.expiresAt - SpotifyApi::nowSecondsF()));
         char b[96];
@@ -3343,7 +3343,7 @@ void App::drawSpotifyLoginScreen() {
         g.roundRect(bX, bY, bW, bH, 16.f, pal.text, hot ? 0.16f : 0.08f);
         g.roundStroke(bX, bY, bW, bH, 16.f, 1.f, pal.text, 0.2f);
         g.icon(ICON_REFRESH, bX + 30.f, bY + bH * 0.5f, 22.f, pal.text);
-        g.textC(tr("New code", "Nuevo codigo"), { css::Md, Weight::SemiBold }, bX + 52.f, bY + bH * 0.5f, pal.text);
+        g.textC(tr("New code", "Nuevo código"), { css::Md, Weight::SemiBold }, bX + 52.f, bY + bH * 0.5f, pal.text);
         g.circle(bX + bW - 26.f, bY + bH * 0.5f, 13.f, pal.text, 0.18f);
         g.textC("Y", { css::Sm, Weight::Bold }, bX + bW - 26.f, bY + bH * 0.5f, pal.text, 1.f, Align::Center);
         if ((click || (plat::padDown() & plat::BtnY)) && cs.state != 3 && cs.state != 4) {
@@ -3359,7 +3359,7 @@ void App::drawSpotifyLoginScreen() {
     const char* icons[3] = { ICON_LINK, ICON_VOL, ICON_GAME };
     const std::string steps[3] = {
         tr("Phone and Switch on the same Wi-Fi", "Celular y Switch en la misma Wi-Fi"),
-        tr("Play a song and tap Devices", "Pon una cancion y toca Dispositivos"),
+        tr("Play a song and tap Devices", "Pon una canción y toca Dispositivos"),
         tr("Pick “SpotiBacan (Switch)”", "Elige «SpotiBacan (Switch)»"),
     };
     float ry = cy + 74.f;
@@ -3372,8 +3372,8 @@ void App::drawSpotifyLoginScreen() {
     }
     const int ps = SpotifyApi::instance().pairingState();
     const std::string pst = ps == 2 ? tr("Signing in…", "Entrando…") : ps == 3 ? tr("Signed in", "Listo")
-                          : ps == 4 ? tr("That didn’t work. Try again from your phone.", "No funciono. Intenta de nuevo desde el celular.")
-                                    : tr("It connects on its own: nothing to press here.", "Se conecta solo: no hay que tocar nada aqui.");
+                          : ps == 4 ? tr("That didn’t work. Try again from your phone.", "No funcionó. Intenta de nuevo desde el celular.")
+                                    : tr("It connects on its own: nothing to press here.", "Se conecta solo: no hay que tocar nada aquí.");
     g.textC(pst, { css::Base }, c2 + 28.f, cy + ch - 46.f, pal.text2, 1.f, Align::Left, int(w2 - 56.f));
 
     g.text(tr("Needs Spotify Premium.", "Requiere Spotify Premium."), { css::Base }, x0, cy + ch + 22.f, pal.text3);

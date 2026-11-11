@@ -328,8 +328,12 @@ void App::drawTitlebar() {
 #else
     float x = 10;
 #endif
-    hint(uid("tb.sidebar"), sidebarFolded() ? tr("Show the sidebar", "Mostrar la barra lateral") : tr("Hide the sidebar", "Ocultar la barra lateral"));
-    if (iconButton(uid("tb.sidebar"), ICON_SIDEBAR, x + 17, cy)) {
+    // SpotiBacan: sin cuenta vinculada no hay nada que buscar ni barra lateral que abrir; en la vista Grande el riel
+    // no se abre, asi que tampoco va el boton (el logo ocupa su lugar)
+    const bool login = !SpotifyApi::instance().hasCredentials();
+    const bool sideToggle = !login && !store.bigLayout;
+    if (sideToggle) hint(uid("tb.sidebar"), sidebarFolded() ? tr("Show the sidebar", "Mostrar la barra lateral") : tr("Hide the sidebar", "Ocultar la barra lateral"));
+    if (sideToggle && iconButton(uid("tb.sidebar"), ICON_SIDEBAR, x + 17, cy)) {
 #ifdef GF_WINDOWED
         if (css::W < kNarrowW) sideOpenedNarrow_ = !sideOpenedNarrow_;   // for now: the setting is for windows with room
         else
@@ -339,10 +343,11 @@ void App::drawTitlebar() {
 #ifdef GF_WINDOWED
     titleKeep_[0] = { x, 0, 34, css::TbH };
 #endif
-    x += 34 + 6;
+    if (sideToggle) x += 34 + 6;
+    else x += 4;
 
     // NXSpotify logo on titlebar
-    const float open = sideOpen();
+    const float open = sideToggle ? sideOpen() : 1.f;
     if (open > 0.02f) {
         const float in = std::clamp((open - 0.35f) / 0.65f, 0.f, 1.f), ina = in * in * (3 - 2 * in);
         auto mix = [](const Rgb& p, const Rgb& q, float t) { return Rgb{ p.r + (q.r - p.r) * t, p.g + (q.g - p.g) * t, p.b + (q.b - p.b) * t }; };
@@ -360,6 +365,7 @@ void App::drawTitlebar() {
     const float left = std::max(sideW + 12, x + 120), right = css::W - 150;
 #endif
     const float sw = std::min(520.f, right - left), sx = left + (right - left - sw) / 2, sy = cy - 16;
+    if (!login) {
     const Id sid = uid("tb.search");
     if (ui.item(sid, { sx, sy, sw, 32 }, 9)) openSearch();
 #ifdef GF_WINDOWED
@@ -382,6 +388,7 @@ void App::drawTitlebar() {
     const float kw = g.measure(searchKey, kf) + 12;
     g.roundStroke(sx + sw - 12 - kw, cy - 9, kw, 18, 5, 1, pal.text, 0.15f);
     g.textC(searchKey, kf, sx + sw - 12 - kw / 2, cy, pal.text3, 1, Align::Center);
+    }
 
     // Where Windows has its caption buttons: the clock, wifi and the battery.
     const std::time_t tt = std::time(nullptr);
@@ -1163,7 +1170,7 @@ void App::drawRail() {
         else if (hot) g.roundRect(x0, y, w, h, 14, pal.text, ui.pressed(id) ? 0.11f : 0.065f);
         const Rgb fg = active ? pal.accentInk : hot ? pal.text : pal.text2;
         g.icon(icon, x0 + w / 2, y + 22, 24, fg);
-        g.textC(label, { css::Xs, Weight::SemiBold }, x0 + w / 2, y + 47, fg, 1.f, Align::Center, int(w - 4));
+        g.textC(label, { 13, Weight::SemiBold }, x0 + w / 2, y + 47, fg, 1.f, Align::Center, int(w - 4));
         y += h + 4;
         return hit;
     };

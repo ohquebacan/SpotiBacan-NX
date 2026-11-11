@@ -1236,7 +1236,7 @@ void SpotifyApi::codeLoop() {
     long status = 0;
     if (!postForm("https://accounts.spotify.com/oauth2/device/authorize",
                   std::string("client_id=") + kPairClientId + "&scope=" + formEncode(kPairScopes), out, status)) {
-        fail(5, "Sin conexion con Spotify. Revisa el Wi-Fi.");
+        fail(5, "Sin conexión con Spotify. Revisa el Wi-Fi.");
         return;
     }
     cJSON* root = cJSON_Parse(out.c_str());
@@ -1249,7 +1249,7 @@ void SpotifyApi::codeLoop() {
     const std::string err = jsonString(root, "error");
     cJSON_Delete(root);
     if (status != 200 || deviceCode.empty() || userCode.empty()) {
-        fail(5, "Spotify no dio un codigo" + (err.empty() ? std::string() : " (" + err + ")") + ". Prueba con Nuevo codigo.");
+        fail(5, "Spotify no dio un código" + (err.empty() ? std::string() : " (" + err + ")") + ". Prueba con Nuevo código.");
         return;
     }
     if (uri.empty()) uri = "https://www.spotify.com/pair";
@@ -1272,7 +1272,7 @@ void SpotifyApi::codeLoop() {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
         if (codeQuit_.load()) return;
-        if (nowSecondsF() > until) { fail(6, "El codigo vencio. Pide uno nuevo."); return; }
+        if (nowSecondsF() > until) { fail(6, "El código venció. Pide uno nuevo."); return; }
         if (!postForm("https://accounts.spotify.com/api/token",
                       std::string("client_id=") + kPairClientId +
                           "&grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=" + formEncode(deviceCode),
@@ -1285,9 +1285,9 @@ void SpotifyApi::codeLoop() {
         if (status == 200 && !accessToken.empty()) break;
         if (e == "authorization_pending") continue;
         if (e == "slow_down") { interval += 5; continue; }
-        if (e == "access_denied") { fail(5, "Se rechazo el acceso en el celular. Pide un codigo nuevo."); return; }
-        if (e == "expired_token") { fail(6, "El codigo vencio. Pide uno nuevo."); return; }
-        fail(5, "Spotify respondio " + (e.empty() ? "HTTP " + std::to_string(status) : e) + ". Pide un codigo nuevo.");
+        if (e == "access_denied") { fail(5, "Se rechazó el acceso en el celular. Pide un código nuevo."); return; }
+        if (e == "expired_token") { fail(6, "El código venció. Pide uno nuevo."); return; }
+        fail(5, "Spotify respondió " + (e.empty() ? "HTTP " + std::to_string(status) : e) + ". Pide un código nuevo.");
         return;
     }
     if (codeQuit_.load() || accessToken.empty()) return;
@@ -1307,7 +1307,7 @@ void SpotifyApi::codeLoop() {
         ctx->config.authData = ctx->session->authenticate(blob);
         ctx->config.username = ctx->session->canonicalUsername;
         if (ctx->config.authData.empty() || ctx->config.username.empty()) {
-            fail(5, "Spotify no acepto el inicio de sesion. Probablemente la cuenta no es Premium.");
+            fail(5, "Spotify no aceptó el inicio de sesión. Probablemente la cuenta no es Premium.");
             return;
         }
         const std::string credJson = ctx->getCredentialsJson();
@@ -1321,7 +1321,7 @@ void SpotifyApi::codeLoop() {
             written = (fclose(f) == 0) && written;
         }
         if (written) { remove(path); written = rename(tmp.c_str(), path) == 0; }
-        if (!written) { fail(5, "No se pudo guardar la sesion en la SD."); return; }
+        if (!written) { fail(5, "No se pudo guardar la sesión en la SD."); return; }
         remove("sdmc:/config/SpotiBacan/do-not-import-poc-credentials");
         {
             std::scoped_lock lock(mutex_);

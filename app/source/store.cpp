@@ -392,10 +392,12 @@ void Store::saveEdits() const {
 }
 
 void Store::saveCovers() const {
-    if (FILE* f = fopen(path("covers.tsv").c_str(), "wb")) {
-        for (const auto& [p, file] : covers) fprintf(f, "%s\t%s\n", p.c_str(), file.c_str());
-        fclose(f);
-    }
+    // SpotiBacan: armado en memoria y escrito por el hilo de escritura (writeFile). Antes era fprintf linea por linea a la
+    // SD en el hilo de la interfaz: ~1 MB de covers.tsv congelaba la app ~2 s cada vez (visto en app.log).
+    std::string out;
+    out.reserve(covers.size() * 96);
+    for (const auto& [p, file] : covers) { out += p; out += '\t'; out += file; out += '\n'; }
+    writeFile("covers.tsv", std::move(out));
 }
 
 void Store::save() const {

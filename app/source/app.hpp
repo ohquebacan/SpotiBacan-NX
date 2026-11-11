@@ -1169,6 +1169,7 @@ private:
     void logoutSpotify();
     void drawSpotifyLoginScreen();
     void drawRail();
+    void rowDownload(int track, float cx, float cy);   // SpotiBacan: ✓ o boton de descarga junto a una cancion
     bool syncSavePending_ = false;   // SpotiBacan: guardar lo sincronizado sin hacerlo por cada lista
     double syncSavedAt_ = 0;   // SpotiBacan: barra lateral como riel de iconos grandes con su nombre
     mutable std::mutex coversMutex_;

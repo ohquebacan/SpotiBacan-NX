@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "downloader.hpp"
 #include "app.hpp"
 #include "icons.inc"
 
@@ -158,6 +159,17 @@ void App::drawNow(float x, float y, float w, float h) {
         bx += button(uid("np.like"), liked ? ICON_HEART_F : ICON_HEART, liked ? tr("Liked", "Me gusta") : tr("Add to Liked", "Agregar a Tus me gusta"), bx, cy, false, &clicked, liked, false,
                      DefaultFocus) + 8;
         if (clicked) { store.toggleLiked(t.path); store.save(); toast(liked ? tr("Removed from Liked", "Quitado de Tus me gusta") : tr("Added to Liked", "Agregado a Tus me gusta")); }
+        // SpotiBacan: descargar la que suena (solo si es una cancion de Spotify con su id real)
+        if (t.path.rfind("spotify:track:", 0) == 0 && t.path.find(':', 14) == std::string::npos) {
+            const DlJob job{ t.path, t.title, t.albumArtist.empty() ? t.artist : t.albumArtist, t.album, t.trackNo };
+            const bool have = Downloader::instance().isDownloaded(job);
+            bx += button(uid("np.dl"), have ? ICON_CHECK : ICON_DOWNLOAD, have ? tr("Downloaded", "Descargada") : tr("Download", "Descargar"),
+                         bx, cy, !have, &clicked, have) + 8;
+            if (clicked && !have) {
+                const int n = Downloader::instance().enqueue({ job });
+                toast(n > 0 ? tr("Downloading to the SD card", "Descargando a la SD") : tr("Already queued", "Ya esta en la cola"));
+            }
+        }
         if (t.albumIdx >= 0) {
             bx += button(uid("np.album"), ICON_GRID, tr("Album", "Album"), bx, cy, false, &clicked) + 8;
             if (clicked) goToAlbum(t.albumIdx);

@@ -35,7 +35,7 @@ float App::button(Id id, const char* icon, const std::string& label, float x, fl
     const float iconW = icon ? 16 + 8 : 0;
     const float natural = 16 + iconW + g.measure(label, f) + 16;
     const float w = std::max(natural, minW);   // a column of buttons one width (Settings › Reset)
-    const float h = 34;
+    const float h = g_bigLayout ? 38.f : 34.f;   // SpotiBacan: mas alto en la vista Grande
     const SDL_FRect r{ x, y, w, h };
     const bool hit = ui.item(id, r, h / 2, flags);
     if (clicked) *clicked = hit;
@@ -444,10 +444,23 @@ void App::listHead(float x, float y, float w, bool showAlbum) {
 }
 
 
-// SpotiBacan (vista Grande): una marca en las canciones de Spotify que ya estan en la SD. Va a memoria, no a la SD.
-static bool downloadedMark(const Track& t) {
-    if (!g_bigLayout || t.path.rfind("spotify:track:", 0) != 0) return false;
-    return Downloader::instance().isDownloaded(DlJob{ t.path, t.title, t.albumArtist.empty() ? t.artist : t.albumArtist, t.album, t.trackNo });
+// SpotiBacan: junto a cada cancion de Spotify, ✓ si ya esta en la SD o un boton redondo para descargarla sola.
+// (en memoria: no toca la SD por fila)
+void App::rowDownload(int track, float cx, float cy) {
+    const Track& t = lib.tracks[track];
+    if (t.path.rfind("spotify:track:", 0) != 0 || t.path.find(':', 14) != std::string::npos) return;
+    const DlJob job{ t.path, t.title, t.albumArtist.empty() ? t.artist : t.albumArtist, t.album, t.trackNo };
+    if (Downloader::instance().isDownloaded(job)) { g.icon(ICON_CHECK, cx, cy, 15, pal.accentInk); return; }
+    const Id id = uid("row.dl", track);
+    const float r = 15;
+    const bool hit = ui.item(id, { cx - r, cy - r, r * 2, r * 2 }, r);
+    const bool hot = ui.pressed(id) || (ui.focused(id) && ui.showFocusRing());
+    if (hot) g.circle(cx, cy, r, pal.text, 0.12f);
+    g.icon(ICON_DOWNLOAD, cx, cy, 15, hot ? pal.text : pal.text3);
+    if (hit) {
+        const int n = Downloader::instance().enqueue({ job });
+        toast(n > 0 ? tr("Downloading to the SD card", "Descargando a la SD") : tr("Already queued", "Ya esta en la cola"));
+    }
 }
 
 bool App::trackRow(Id id, int track, int number, float x, float y, float w, float h, bool showAlbum) {
@@ -475,7 +488,7 @@ bool App::trackRow(Id id, int track, int number, float x, float y, float w, floa
     g.textC(t.artist, { css::Base }, cx, cy, pal.text2, 1, Align::Left, int(fr));
     cx += fr + gap;
     if (showAlbum) { g.textC(t.album, { css::Base }, cx, cy, pal.text2, 1, Align::Left, int(fr)); cx += fr + gap; }
-    if (downloadedMark(t)) g.icon(ICON_CHECK, cx + 64 - 52, cy, 15, pal.accentInk);
+    rowDownload(track, cx + 64 - 54, cy);
     g.textC(t.duration > 0 ? fmtTime(t.duration) : "", { css::Sm }, cx + 64, cy, pal.text3, 1, Align::Right);
     return hit;
 }
