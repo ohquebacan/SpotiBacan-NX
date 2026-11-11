@@ -457,7 +457,38 @@ void App::drawCanvas() {
             g.circle(padX + pw * frac, base, 6, pal.text, a);
         }
     }
-    if (vz > 0.001f) {
+    if (vz > 0.001f && store.vizStyle == 1) {
+        // SpotiBacan: puntos LED. Cada columna es una banda; se encienden de abajo hacia arriba y cada fila toma su color de
+        // una rampa de la paleta del disco (segundo acento -> acento -> brillo -> acento claro), asi la columna llena
+        // recorre casi toda la paleta. Lo ya sonado brilla mas (sigue siendo la barra de progreso); el pico, en blanco.
+        const int n = std::clamp(spec.bands / 2, 16, 40);
+        const int rows = 14;
+        const float maxH = 128, colW = pw / n, rowH = maxH / rows, played = padX + pw * frac;
+        const float r = std::max(2.f, std::min(colW, rowH) * 0.36f);
+        const Rgb ramp[4] = { pal.accent2, pal.accent, pal.glow, pal.accentInk };
+        auto rampAt = [&](float f) {
+            f = clampf(f, 0, 1) * 3;
+            const int k = std::min(2, int(f));
+            const float u = f - k;
+            const Rgb& p = ramp[k]; const Rgb& q = ramp[k + 1];
+            return Rgb{ p.r + (q.r - p.r) * u, p.g + (q.g - p.g) * u, p.b + (q.b - p.b) * u };
+        };
+        for (int i = 0; i < n; i++) {
+            // dos bandas por columna (la mas alta), para que los puntos no queden diminutos
+            const int b0 = std::min(spec.bands - 1, i * 2), b1 = std::min(spec.bands - 1, i * 2 + 1);
+            const float v = std::max(spec.bars[b0], spec.bars[b1]), pk = std::max(spec.peaks[b0], spec.peaks[b1]);
+            const int lit = int(std::round(clampf(v, 0, 1) * rows * vz));
+            const int peakRow = std::min(rows - 1, int(std::round(clampf(pk, 0, 1) * rows)) - 1);
+            const float cx = padX + colW * (i + 0.5f);
+            const float a = vz * (cx <= played ? 1.f : 0.55f);
+            for (int rr = 0; rr < rows; rr++) {
+                const float cy = base - rowH * (rr + 0.5f);
+                if (rr < lit) g.circle(cx, cy, r, rampAt(float(rr) / (rows - 1)), a);
+                else if (store.vizPeaks && rr == peakRow && peakRow >= lit) g.circle(cx, cy, r, pal.text, 0.7f * a);
+                else g.circle(cx, cy, r * 0.8f, pal.text, 0.06f * vz);
+            }
+        }
+    } else if (vz > 0.001f) {
         // viz.js proportions: gap max(2, w/n·0.28); bars from the 56 bands, interpolated across the width
         const int n = std::max(2, spec.bands);   // Settings → Visualizer → Bars in the Canvas
         const float gap = std::max(2.f, std::round(pw / n * 0.28f)), bw = (pw - gap * (n - 1)) / n;

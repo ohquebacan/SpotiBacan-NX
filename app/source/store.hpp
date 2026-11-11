@@ -49,7 +49,8 @@ struct Store {
     float volume = 0.5f;   // first-run defaults: the user's choices (2026-10-28, NEXT_SESSION #18)
     Order order = Order::RepeatAll;
     bool sidebarCollapsed = false;
-    bool bigLayout = true;   // SpotiBacan: vista Grande (riel, pastillas, filas altas) o Clasica (la de NXtify)
+    bool bigLayout = true;
+    int vizStyle = 1;   // SpotiBacan: visualizador del Canvas, 0 barras (tubos) / 1 puntos LED   // SpotiBacan: vista Grande (riel, pastillas, filas altas) o Clasica (la de NXtify)
     bool motion = true;
     // Settings › Appearance › Automix (the user, 2026-10-29): how a join shows. Now playing: 0 Full (the interface steps
     // aside, the cover glides to the screen's middle), 1 Immersive (the cover to the page's middle, the bars stay), 2 Simple

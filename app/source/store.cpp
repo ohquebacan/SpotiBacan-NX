@@ -156,6 +156,7 @@ void Store::load() {
         else if (k == "order") order = Order(std::clamp(atoi(v.c_str()), 0, 3));
         else if (k == "sidebarCollapsed") sidebarCollapsed = v == "1";
         else if (k == "bigLayout") bigLayout = v == "1";
+        else if (k == "vizStyle") vizStyle = std::clamp(atoi(v.c_str()), 0, 1);
         else if (k == "motion") motion = v == "1";
         else if (k == "mixAnimNow") mixAnimNow = std::clamp(atoi(v.c_str()), 0, 2);
         else if (k == "mixAnimCanvas") mixAnimCanvas = std::clamp(atoi(v.c_str()), 0, 1);
@@ -447,7 +448,7 @@ void Store::save() const {
     appendf(f, "\ntabLines=1");   // knows placed lines (Store::load)
     appendf(f, "\n");
     appendf(f, "showHidden=%d\nfilesTab=1\nviewPlaylists=%d\n", showHidden, viewPlaylists);
-    appendf(f, "autoSave=%d\nbigLayout=%d\n", autoSave ? 1 : 0, bigLayout ? 1 : 0);   // filesTab: hiddenTabs already knows the Files tab (bit 6)
+    appendf(f, "autoSave=%d\nbigLayout=%d\nvizStyle=%d\n", autoSave ? 1 : 0, bigLayout ? 1 : 0, vizStyle);   // filesTab: hiddenTabs already knows the Files tab (bit 6)
     for (const auto& [k, v] : { std::pair<const char*, const std::string*>{ "filesDir", &filesDir }, { "importDir", &importDir },
                                 { "exportDir", &exportDir }, { "coverDir", &coverDir }, { "backupDir", &backupDir } })
         if (!v->empty()) appendf(f, "%s=%s\n", k, v->c_str());
