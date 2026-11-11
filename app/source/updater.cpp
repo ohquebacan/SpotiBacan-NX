@@ -29,7 +29,7 @@ constexpr const char* kApiUrl = "https://api.github.com/repos/ohquebacan/SpotiBa
 constexpr const char* kModels = "https://github.com/AndryTheBeast/songate-automix/releases/latest/download/";
 constexpr const char* kModelsManifest = "songate-automix-models.json";
 constexpr const char* kManifest = "songate-manifest.json";
-constexpr const char* kSysDir = "atmosphere/contents/4200000000535754/";   // the NXtify background player's
+constexpr const char* kSysDir = "atmosphere/contents/4200000000535754/";   // the SpotiBacán background player's
 constexpr const char* kSysDirOld = "atmosphere/contents/4200000047464E58/";
 constexpr const char* kNro = "switch/SpotiBacan/SpotiBacan.nro";
 constexpr const char* kOverlay = "switch/.overlays/NXtify.ovl";
@@ -567,7 +567,7 @@ bool zipRead(FILE* f, const ZipEntry& e, std::vector<uint8_t>& out, std::string&
         out.reserve(e.usize);
         Inflater inf{ comp.data(), comp.size(), 0, 0, 0, false, out };
         if (!inf.run()) { err = "Could not unpack " + e.name; return false; }
-    } else { err = "The zip packs " + e.name + " in a way NXtify cannot read"; return false; }
+    } else { err = "The zip packs " + e.name + " in a way SpotiBacán cannot read"; return false; }
     if (out.size() != e.usize || crc32(out.data(), out.size()) != e.crc) { err = e.name + " did not unpack correctly"; return false; }
     return true;
 }
@@ -786,7 +786,7 @@ std::vector<UpdRelease> readReleases(const std::string& api) {
     return out;
 }
 
-/** songate-automix-models.json → the models it lists (a newer format than this NXtify knows: none). */
+/** songate-automix-models.json → the models it lists (a newer format than this SpotiBacán knows: none). */
 std::vector<UpdModel> readModels(const std::string& text) {
     std::vector<UpdModel> out;
     Json m;
@@ -1069,9 +1069,9 @@ void Updater::doCheck() {
 
 bool Updater::modelUsable(const UpdModel& m, std::string* why) {
     auto no = [&](const char* w) { if (why) *why = w; return false; };
-    if (m.format > automix::ModelFile::Format) return no("It needs a newer NXtify: it is planned by logic this version does not have");
-    if (m.mixan > mixan::Version) return no("It needs a newer NXtify: it was trained on a newer analysis");
-    if (compare(m.app, thisVersion()) > 0) return no(("It needs NXtify " + m.app + " or newer").c_str());
+    if (m.format > automix::ModelFile::Format) return no("It needs a newer SpotiBacán: it is planned by logic this version does not have");
+    if (m.mixan > mixan::Version) return no("It needs a newer SpotiBacán: it was trained on a newer analysis");
+    if (compare(m.app, thisVersion()) > 0) return no(("It needs SpotiBacán " + m.app + " or newer").c_str());
     return true;
 }
 
@@ -1125,7 +1125,7 @@ void Updater::doInstall(UpdRelease r, bool fresh, std::string backupRoot) {
     const std::string zip = up + "/" + (r.zipName.empty() ? "release.zip" : r.zipName);
     const bool checkSha = (r.zipSha.size() == 64);
     for (const Legacy& l : kLegacy)   // GitHub's digest and Gatefold's own table must agree
-        if (r.version == l.version && checkSha && r.zipSha != l.sha) { fail("The release's checksum is not the one NXtify knows: it was not installed"); return; }
+        if (r.version == l.version && checkSha && r.zipSha != l.sha) { fail("The release's checksum is not the one SpotiBacán knows: it was not installed"); return; }
 
     // ---- 1. the zip (kept from an earlier try when it is already whole and right)
     phase_ = Downloading;
@@ -1173,7 +1173,7 @@ void Updater::doInstall(UpdRelease r, bool fresh, std::string backupRoot) {
     FILE* f = fopen(zip.c_str(), "rb");
     if (!f) { fail("Could not open the download"); return; }
     std::vector<ZipEntry> entries;
-    if (!zipList(f, entries)) { fclose(f); fail("The download is not a zip NXtify can read"); return; }
+    if (!zipList(f, entries)) { fclose(f); fail("The download is not a zip SpotiBacán can read"); return; }
     std::vector<std::string> placed;   // the .gfnew files written, to take back on failure
     auto undo = [&] { for (const auto& p : placed) remove((p + ".gfnew").c_str()); };
     prog_.done = 0;

@@ -121,7 +121,7 @@ public:
     static std::string pretty(const std::string& v);   // the app's spelling: "2.0.0-beta.1" → "2.0.0 BETA 1"
     /** A release as it was named: "Gatefold NX 1.1.0" before the rebranding, "Songate 2.0.0" from it on (the releases
      *  before stay as they are: the user, 2026-10-29). */
-    static std::string releaseName(const std::string& v) { return "NXtify " + v; }
+    static std::string releaseName(const std::string& v) { return "SpotiBacán " + v; }
     static std::string thisVersion();
     static int thisProtocol();   // GFBG_PROTOCOL: the background player this app talks to
 

@@ -34,6 +34,8 @@ class Session {
   std::string deviceId = "142137fd329622137a14901634264e6f332e2411";
 
  public:
+  // SpotiBacan: canonical username from APWelcome (needed to store a token login)
+  std::string canonicalUsername;
   Session();
   ~Session();
 

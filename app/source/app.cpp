@@ -3,6 +3,7 @@
  * Lifecycle, input mapping, play queue and track loading.
  */
 #include "downloader.hpp"
+#include "qrcodegen.h"
 #include "app.hpp"
 #include "cores.hpp"
 #include "icons.inc"
@@ -3216,63 +3217,140 @@ void App::logoutSpotify() {
     toast(tr("Logged out", "Sesion cerrada"));
 }
 
+// SpotiBacan: «Conecta tu cuenta». Dos formas a la vez, en tarjetas grandes para el dedo: con un codigo
+// (spotify.com/pair, con QR) o desde la app de Spotify (Connect por Wi-Fi). Botones de al menos 56 px de alto.
 void App::drawSpotifyLoginScreen() {
-    const float cardW = 760.f;
-    const float cardH = 520.f;
-    const float cx = std::round((css::W - cardW) * 0.5f);
-    const float cy = std::round(css::TbH + (css::H - css::TbH - cardH) * 0.5f);
+    const Rgb green{ 0.118f, 0.843f, 0.376f };
+    const Rgb greenText{ 0.494f, 0.941f, 0.651f };
+    const float x0 = 56.f, top = css::TbH + 28.f, w = css::W - 2 * x0;
 
-    g.roundRect(cx, cy, cardW, cardH, 24.f, pal.surface, 0.88f);
-    g.roundStroke(cx, cy, cardW, cardH, 24.f, 1.5f, pal.accent, 0.35f);
+    // cabecera
+    g.circle(x0 + 30.f, top + 30.f, 30.f, green);
+    g.icon(ICON_SPOTIFY, x0 + 30.f, top + 30.f, 36.f, { 0.055f, 0.067f, 0.063f });
+    g.text(tr("Connect your account", "Conecta tu cuenta"), { css::Xxl, Weight::ExtraBold }, x0 + 80.f, top + 2.f, pal.text);
+    g.text(tr("Pick one way. Both work at the same time.", "Elige una forma. Las dos funcionan a la vez."), { css::Md }, x0 + 80.f, top + 44.f, pal.text2);
 
-    const float midX = cx + cardW * 0.5f;
-    float y = cy + 36.f;
+    const float cy = top + 92.f, ch = 410.f, gap = 20.f;
+    const float w1 = std::round((w - gap) * 0.54f), w2 = w - gap - w1;
+    const float c1 = x0, c2 = x0 + w1 + gap;
+    const auto cs = SpotifyApi::instance().codeState();
 
-    // NXtify badge
-    g.circle(midX, y + 28.f, 30.f, { 0.118f, 0.843f, 0.376f }, 0.18f);
-    g.icon(ICON_SPOTIFY, midX, y + 28.f, 38.f, { 0.118f, 0.843f, 0.376f });
-    y += 72.f;
-
-    g.text(tr("Connect your account", "Conecta tu cuenta"), { css::Xxl, Weight::ExtraBold }, midX, y, pal.text, 1.f, Align::Center);
-    y += 40.f;
-    g.text(tr("No active session found. Follow these instructions to sign in:",
-              "No hay ninguna sesion activa. Sigue estas instrucciones para iniciar sesion:"),
-           { css::Base }, midX, y, pal.text2, 1.f, Align::Center);
-    y += 40.f;
-
-    const char* steps[4] = {
-        tr("1. Connect your Nintendo Switch and your phone or PC to the same Wi-Fi network.",
-           "1. Conecta tu Nintendo Switch y tu telefono o PC a la misma red Wi-Fi."),
-        tr("2. Open your music streaming app on your phone, tablet, or computer.",
-           "2. Abre tu aplicacion de musica en tu telefono, tablet o computadora."),
-        tr("3. Play a song and tap the Devices / Connect icon.",
-           "3. Reproduce una cancion y toca el icono de Dispositivos (Connect)."),
-        tr("4. Select \"Nintendo Switch\" from the list. The session will start automatically.",
-           "4. Selecciona \"Nintendo Switch\" en la lista. La sesion se abrira automaticamente.")
-    };
-
-    const float stepX = cx + 48.f;
-    const float stepW = cardW - 96.f;
-    for (int i = 0; i < 4; ++i) {
-        g.roundRect(stepX, y, stepW, 48.f, 12.f, pal.text, 0.05f);
-        g.roundStroke(stepX, y, stepW, 48.f, 12.f, 1.f, pal.text, 0.08f);
-        g.textC(steps[i], { css::Base, Weight::SemiBold }, stepX + 18.f, y + 24.f, pal.text, 1.f, Align::Left, int(stepW - 36.f));
-        y += 58.f;
+    // tarjeta 1: con un codigo
+    g.roundRect(c1, cy, w1, ch, 20.f, pal.surface, 0.92f);
+    g.roundStroke(c1, cy, w1, ch, 20.f, 2.f, green, 0.9f);
+    g.text(tr("With a code", "Con un codigo"), { css::Lg, Weight::Bold }, c1 + 28.f, cy + 24.f, pal.text);
+    {
+        const std::string badge = tr("Recommended", "Recomendado");
+        const float bw = float(g.measure(badge, { css::Sm, Weight::SemiBold })) + 24.f;
+        const float bx = c1 + 28.f + float(g.measure(tr("With a code", "Con un codigo"), { css::Lg, Weight::Bold })) + 12.f;
+        g.roundRect(bx, cy + 25.f, bw, 26.f, 13.f, green, 0.16f);
+        g.textC(badge, { css::Sm, Weight::SemiBold }, bx + bw * 0.5f, cy + 38.f, greenText, 1.f, Align::Center);
     }
 
-    y += 14.f;
-    const int pState = SpotifyApi::instance().pairingState();
-    const std::string st = pState == 2 ? tr("Authenticating session...", "Autenticando sesion...")
-                         : pState == 3 ? tr("Signed in! Loading library...", "Sesion iniciada! Cargando biblioteca...")
-                         : pState == 4 ? tr("Authentication error. Retrying...", "Error al autenticar. Reintentando...")
-                                       : tr("Waiting for connection on 'Nintendo Switch'...", "Esperando conexion en 'Nintendo Switch'...");
-    const float pillW = std::min(stepW, float(g.measure(st, { css::Sm, Weight::SemiBold }) + 56.f));
-    const float pillX = midX - pillW * 0.5f;
-    g.roundRect(pillX, y, pillW, 38.f, 19.f, { 0.118f, 0.843f, 0.376f }, 0.14f);
-    g.roundStroke(pillX, y, pillW, 38.f, 19.f, 1.f, { 0.118f, 0.843f, 0.376f }, 0.45f);
-    const float pulse = 0.45f + 0.55f * (0.5f + 0.5f * std::sin(float(time) * 4.0f));
-    g.circle(pillX + 20.f, y + 19.f, 5.f, { 0.118f, 0.843f, 0.376f }, pulse);
-    g.textC(st, { css::Sm, Weight::SemiBold }, pillX + 34.f, y + 19.f, pal.text, 1.f, Align::Left, int(pillW - 46.f));
+    const float qs = 200.f, qx = c1 + 28.f, qy = cy + 74.f;
+    g.roundRect(qx, qy, qs, qs, 14.f, { 1, 1, 1 });
+    if (cs.state == 2 && !cs.uriComplete.empty()) {
+        static std::string qrFor;
+        static std::vector<uint8_t> qrMods;
+        static int qrSize = 0;
+        if (qrFor != cs.uriComplete) {
+            qrFor = cs.uriComplete;
+            std::vector<uint8_t> tmp(qrcodegen_BUFFER_LEN_MAX), qr(qrcodegen_BUFFER_LEN_MAX);
+            qrSize = 0;
+            qrMods.clear();
+            if (qrcodegen_encodeText(qrFor.c_str(), tmp.data(), qr.data(), qrcodegen_Ecc_LOW, qrcodegen_VERSION_MIN, 10,
+                                     qrcodegen_Mask_AUTO, true)) {
+                qrSize = qrcodegen_getSize(qr.data());
+                qrMods.resize(size_t(qrSize * qrSize));
+                for (int yy = 0; yy < qrSize; ++yy)
+                    for (int xx = 0; xx < qrSize; ++xx) qrMods[size_t(yy * qrSize + xx)] = qrcodegen_getModule(qr.data(), xx, yy);
+            }
+        }
+        if (qrSize > 0) {
+            const float m = std::floor((qs - 24.f) / float(qrSize));
+            const float ox = qx + std::round((qs - m * qrSize) * 0.5f), oy = qy + std::round((qs - m * qrSize) * 0.5f);
+            for (int yy = 0; yy < qrSize; ++yy) {
+                int run = -1;   // tramos horizontales: menos rectangulos por cuadro
+                for (int xx = 0; xx <= qrSize; ++xx) {
+                    const bool on = xx < qrSize && qrMods[size_t(yy * qrSize + xx)];
+                    if (on && run < 0) run = xx;
+                    if (!on && run >= 0) { g.rect(ox + run * m, oy + yy * m, (xx - run) * m, m, { 0, 0, 0 }); run = -1; }
+                }
+            }
+        }
+    } else {
+        g.icon(cs.state >= 5 ? ICON_REFRESH : ICON_SPOTIFY, qx + qs * 0.5f, qy + qs * 0.5f, 56.f, { 0.6f, 0.6f, 0.6f });
+    }
+
+    const float tx = qx + qs + 28.f, tw = c1 + w1 - 28.f - tx;
+    g.text(tr("1. Scan it, or go to", "1. Escanealo o entra en"), { css::Base }, tx, qy + 6.f, pal.text2);
+    g.text("spotify.com/pair", { css::Xl, Weight::Bold }, tx, qy + 30.f, greenText, 1.f, Align::Left, int(tw));
+    g.text(tr("2. Type this code", "2. Escribe este codigo"), { css::Base }, tx, qy + 86.f, pal.text2);
+    const std::string codeTxt = cs.state == 2 ? cs.userCode : cs.state <= 1 ? "· · ·" : cs.state == 3 || cs.state == 4 ? "OK" : "—";
+    g.text(codeTxt, { css::Hero, Weight::ExtraBold }, tx, qy + 108.f, pal.text, 1.f, Align::Left, int(tw));
+
+    // estado + Nuevo codigo
+    const float sy = cy + ch - 84.f;
+    std::string st;
+    Rgb dot = green;
+    switch (cs.state) {
+    case 0: case 1: st = tr("Getting a code…", "Pidiendo un codigo…"); break;
+    case 2: {
+        const int left = std::max(0, int(cs.expiresAt - SpotifyApi::nowSecondsF()));
+        char b[96];
+        snprintf(b, sizeof b, tr("Waiting… expires in %d:%02d", "Esperando… vence en %d:%02d"), left / 60, left % 60);
+        st = b;
+        break;
+    }
+    case 3: st = tr("Signing in…", "Entrando…"); break;
+    case 4: st = tr("Signed in. Loading your library…", "Listo. Cargando tu biblioteca…"); break;
+    default: st = cs.error; dot = { 0.95f, 0.45f, 0.35f }; break;
+    }
+    const float pulse = cs.state == 2 ? 0.45f + 0.55f * (0.5f + 0.5f * std::sin(float(time) * 4.0f)) : 1.f;
+    const float bW = 230.f, bH = 60.f, bX = c1 + w1 - 28.f - bW, bY = sy + 12.f;
+    g.circle(c1 + 34.f, bY + bH * 0.5f, 6.f, dot, pulse);
+    g.textC(st, { css::Base, Weight::SemiBold }, c1 + 50.f, bY + bH * 0.5f, pal.text2, 1.f, Align::Left, int(bX - c1 - 64.f));
+    {
+        const Id id = uid("login.newcode");
+        const bool hot = ui.pressed(id) || (ui.focused(id) && ui.showFocusRing());
+        const bool click = ui.item(id, { bX, bY, bW, bH }, 16);
+        g.roundRect(bX, bY, bW, bH, 16.f, pal.text, hot ? 0.16f : 0.08f);
+        g.roundStroke(bX, bY, bW, bH, 16.f, 1.f, pal.text, 0.2f);
+        g.icon(ICON_REFRESH, bX + 30.f, bY + bH * 0.5f, 22.f, pal.text);
+        g.textC(tr("New code", "Nuevo codigo"), { css::Md, Weight::SemiBold }, bX + 52.f, bY + bH * 0.5f, pal.text);
+        g.circle(bX + bW - 26.f, bY + bH * 0.5f, 13.f, pal.text, 0.18f);
+        g.textC("Y", { css::Sm, Weight::Bold }, bX + bW - 26.f, bY + bH * 0.5f, pal.text, 1.f, Align::Center);
+        if ((click || (plat::padDown() & plat::BtnY)) && cs.state != 3 && cs.state != 4) {
+            SpotifyApi::instance().stopCodePairing();
+            SpotifyApi::instance().startCodePairing();
+        }
+    }
+
+    // tarjeta 2: desde la app de Spotify
+    g.roundRect(c2, cy, w2, ch, 20.f, pal.surface, 0.92f);
+    g.roundStroke(c2, cy, w2, ch, 20.f, 1.f, pal.text, 0.12f);
+    g.text(tr("From the Spotify app", "Desde la app de Spotify"), { css::Lg, Weight::Bold }, c2 + 28.f, cy + 24.f, pal.text);
+    const char* icons[3] = { ICON_LINK, ICON_VOL, ICON_GAME };
+    const std::string steps[3] = {
+        tr("Phone and Switch on the same Wi-Fi", "Celular y Switch en la misma Wi-Fi"),
+        tr("Play a song and tap Devices", "Pon una cancion y toca Dispositivos"),
+        tr("Pick “SpotiBacan (Switch)”", "Elige «SpotiBacan (Switch)»"),
+    };
+    float ry = cy + 74.f;
+    for (int i = 0; i < 3; ++i) {
+        g.roundRect(c2 + 24.f, ry, w2 - 48.f, 72.f, 16.f, pal.text, 0.05f);
+        g.circle(c2 + 64.f, ry + 36.f, 22.f, green, 0.16f);
+        g.icon(icons[i], c2 + 64.f, ry + 36.f, 24.f, greenText);
+        g.textC(steps[i], { css::Md, Weight::SemiBold }, c2 + 100.f, ry + 36.f, pal.text, 1.f, Align::Left, int(w2 - 140.f));
+        ry += 84.f;
+    }
+    const int ps = SpotifyApi::instance().pairingState();
+    const std::string pst = ps == 2 ? tr("Signing in…", "Entrando…") : ps == 3 ? tr("Signed in", "Listo")
+                          : ps == 4 ? tr("That didn’t work. Try again from your phone.", "No funciono. Intenta de nuevo desde el celular.")
+                                    : tr("It connects on its own: nothing to press here.", "Se conecta solo: no hay que tocar nada aqui.");
+    g.textC(pst, { css::Base }, c2 + 28.f, cy + ch - 46.f, pal.text2, 1.f, Align::Left, int(w2 - 56.f));
+
+    g.text(tr("Needs Spotify Premium.", "Requiere Spotify Premium."), { css::Base }, x0, cy + ch + 22.f, pal.text3);
 }
 
 void App::saveSpotifyLibrary() {
@@ -3610,7 +3688,7 @@ void App::setBackground(bool on) {
             loadTrack(q.tracks[q.order[q.pos]], !playing);
             if (at > 1) player.seek(at);
         }
-        toast(tr("Playing in NXtify only: music stops when you leave it", "Reproduciendo solo en NXtify: la musica se detiene al salir"));
+        toast(tr("Playing in SpotiBacán only: music stops when you leave it", "Reproduciendo solo en SpotiBacán: la musica se detiene al salir"));
     }
 }
 

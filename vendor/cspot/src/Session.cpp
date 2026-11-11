@@ -117,6 +117,7 @@ std::vector<uint8_t> Session::authenticate(std::shared_ptr<LoginBlob> blob) {
       APWelcome welcome;
       CSPOT_LOG(debug, "Authorization successful");
       pbDecode(welcome, APWelcome_fields, packet.data);
+      canonicalUsername = welcome.canonical_username;
       return std::vector<uint8_t>(welcome.reusable_auth_credentials.bytes,
                                   welcome.reusable_auth_credentials.bytes +
                                       welcome.reusable_auth_credentials.size);
