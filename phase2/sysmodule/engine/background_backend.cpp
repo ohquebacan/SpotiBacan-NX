@@ -24,7 +24,10 @@ constexpr const char* ArtworkUrlTemporary =
     "/config/SpotiBacan/current-artwork-url.tmp";
 constexpr size_t MaxBrowseItems = 32;
 constexpr size_t BrowsePageSize = 25;
-constexpr size_t RemoteTrackPageSize = 50;
+// OQB: 25 (era 50). El servicio tiene ~1.75 MB de memoria y la respuesta de
+// Spotify de 50 canciones, ya interpretada, podía agotarla (std::bad_alloc al
+// abrir «Tus me gusta» con una biblioteca grande). 25 = una página visible.
+constexpr size_t RemoteTrackPageSize = 25;
 
 std::string itemCountText(size_t count, const char* singular,
                           const char* plural) {
